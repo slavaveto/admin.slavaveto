@@ -2,7 +2,9 @@ import { signOutAction } from "@/app/actions";
 import { hasEnvVars } from "@/app/assets/auth/utils/supabase/check-env-vars";
 import Link from "next/link";
 import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
+// import { Button } from "./ui/button";
+import {Button, ButtonGroup} from "@nextui-org/button";
+
 import { createClient } from "@/app/assets/auth/utils/supabase/server";
 
 export default async function AuthButton() {
@@ -26,18 +28,14 @@ export default async function AuthButton() {
           </div>
           <div className="flex gap-2">
             <Button
-              asChild
               size="sm"
-              variant={"outline"}
               disabled
               className="opacity-75 cursor-none pointer-events-none"
             >
               <Link href="/sign-in">Sign in</Link>
             </Button>
             <Button
-              asChild
               size="sm"
-              variant={"default"}
               disabled
               className="opacity-75 cursor-none pointer-events-none"
             >
@@ -52,14 +50,14 @@ export default async function AuthButton() {
     <div className="flex items-center gap-4">
       {/*Hey, {user.email}!*/}
       <form action={signOutAction}>
-        <Button type="submit" variant={"outline"}>
+        <Button type="submit" color="primary">
           Sign out
         </Button>
       </form>
     </div>
   ) : (
     <div className="flex gap-2">
-      <Button asChild size="sm" variant={"outline"}>
+      <Button color="primary" >
         <Link href="/sign-in">Sign in</Link>
       </Button>
       {/*<Button asChild size="sm" variant={"default"}>*/}

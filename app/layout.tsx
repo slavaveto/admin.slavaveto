@@ -7,6 +7,8 @@ import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import Link from "next/link";
 import "./globals.css";
+import { Providers } from "@/app/components/Providers";
+
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -30,36 +32,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={geistSans.className} suppressHydrationWarning>
-      <body className="bg-background text-foreground flex flex-col min-h-svh">
-      <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange>
-
-          <header className="backdrop-blur-xl py-[10px] bg-blue-50"
-                  style={{position: 'sticky', top: 0, zIndex: 50,}}
-          >
-
-              <div className="container flex mx-auto px-3 justify-end -max-w-xl">
+    <body className="bg-background text-foreground">
 
 
-                  {!hasEnvVars ? <EnvVarWarning/> : <HeaderAuth/>}
-              </div>
+    <Providers>
 
-          </header>
+      {children}
 
-                  {children}
-
-          <footer className="footer_bg flex  items-center bg-blue-50">
-              <div className="container flex mx-auto px-3 -justify-between justify-end items-center">
-                  <ThemeSwitcher/>
-              </div>
-          </footer>
+    </Providers>
 
 
-      </ThemeProvider>
-      </body>
+    </body>
     </html>
-  );
+);
 }
