@@ -1,8 +1,8 @@
 #зУстановка
 
-clear commit message
-idea
-
+#clear commit message
+#.idea/
+#git rm -r --cached .idea
 
 # dependencies
 /node_modules
