@@ -1,8 +1,8 @@
 import { createClient } from '@/app/assets/auth/utils/supabase/server';
 import { redirect } from 'next/navigation';
-import EditableNotes from '../components/EditableNotes';
+import EditableNotes from '@/app/components/EditableNotes';
 
-export default async function Page() {
+export default async function Test2 () {
     const supabase = await createClient();
 
     const {

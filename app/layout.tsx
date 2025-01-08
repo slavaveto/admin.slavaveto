@@ -1,8 +1,8 @@
-import DeployButton from "@/app/auth/components/deploy-button";
-import { EnvVarWarning } from "@/app/auth/components/env-var-warning";
-import HeaderAuth from "@/app/auth/components/header-auth";
-import { ThemeSwitcher } from "@/app/auth/components/theme-switcher";
-import { hasEnvVars } from "@/app/auth/utils/supabase/check-env-vars";
+import DeployButton from "@/app/assets/auth/components/deploy-button";
+import { EnvVarWarning } from "@/app/assets/auth/components/env-var-warning";
+import HeaderAuth from "@/app/assets/auth/components/header-auth";
+import { ThemeSwitcher } from "@/app/assets/auth/components/theme-switcher";
+import { hasEnvVars } from "@/app/assets/auth/utils/supabase/check-env-vars";
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import Link from "next/link";

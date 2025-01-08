@@ -1,8 +1,8 @@
 import { resetPasswordAction } from "@/app/actions";
-import { FormMessage, Message } from "@/app/auth/components/form-message";
-import { SubmitButton } from "@/app/auth/components/submit-button";
-import { Input } from "@/app/auth/components/ui/input";
-import { Label } from "@/app/auth/components/ui/label";
+import { FormMessage, Message } from "@/app/assets/auth/components/form-message";
+import { SubmitButton } from "@/app/assets/auth/components/submit-button";
+import { Input } from "@/app/assets/auth/components/ui/input";
+import { Label } from "@/app/assets/auth/components/ui/label";
 
 export default async function ResetPassword(props: {
   searchParams: Promise<Message>;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { createClient } from '@/app/auth/utils/supabase/client'; // Импорт клиента
+import { createClient } from '@/app/assets/auth/utils/supabase/client'; // Импорт клиента
 
 export default function EditableNotes({ notes }: { notes: any[] }) {
     return (

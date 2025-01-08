@@ -1,13 +1,13 @@
 "use client";
 
-import { Button } from "@/app/auth/components/ui/button";
+import { Button } from "@/app/assets/auth/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
-} from "@/app/auth/components/ui/dropdown-menu";
+} from "@/app/assets/auth/components/ui/dropdown-menu";
 import { Laptop, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
