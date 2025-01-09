@@ -1,76 +1,100 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@/app/assets/auth/utils/supabase/client'; // Импорт клиента
-import { Listbox, ListboxItem, Skeleton } from '@nextui-org/react'; // Добавлен Skeleton
+import { createClient } from '@/app/assets/auth/utils/supabase/client';
+import { Listbox, ListboxItem, Skeleton } from '@nextui-org/react';
+
+import { Edit, RefreshCcw } from 'lucide-react';
+import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from '@nextui-org/react';
 
 interface Page {
     page_key: string;
     order?: number;
-    btn_type?: string; // Указываем, что btn_type может быть undefined
+    btn_type?: string;
 }
 
 export default function PagesData() {
-    const [pages, setPages] = useState<Page[]>([]); // Указываем, что состояние состоит из массива объектов Page
+    const [pages, setPages] = useState<Page[]>([]);
     const [selectedPage, setSelectedPage] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(true); // Состояние загрузки
+    const [isPagesLoading, setIsPagesLoading] = useState(true);
+    const [isPageContentLoading, setIsPageContentLoading] = useState(true);
 
-    // Загрузка данных из таблицы `_pages` с задержкой для скелетона
     useEffect(() => {
         const fetchPages = async () => {
+            const startTime = Date.now();
             const supabase = createClient();
             const { data, error } = await supabase
                 .from('_pages')
-                .select('page_key, order, btn_type'); // Загружаем поле btn_type
+                .select('page_key, order, btn_type');
 
             if (error) {
-                console.error('Failed to fetch pages:', error.message);
+                //console.error('Failed to fetch pages:', error.message);
                 return;
             }
 
-            // Добавляем `home` наверх, `misc` внизу, сортируем остальные по `order`
             const allPages: Page[] = [
-                { page_key: 'home', order: -1 }, // `home` всегда первый
+                { page_key: 'home', order: -1 },
                 ...(data || [])
-                    .map((page) => ({ ...page, order: page.order ?? Infinity })) // Устанавливаем `Infinity` для пустых `order`
-                    .sort((a, b) => a.order! - b.order!), // Сортируем по `order`
-                { page_key: 'misc', order: Infinity + 1 }, // `misc` всегда последний
+                    .map((page) => ({ ...page, order: page.order ?? Infinity }))
+                    .sort((a, b) => a.order! - b.order!),
+                { page_key: 'misc', order: Infinity + 1 },
             ];
 
             setPages(allPages);
 
-            // Восстанавливаем активную вкладку из localStorage
             const savedPage = localStorage.getItem('selectedPage');
             if (savedPage && allPages.find((page) => page.page_key === savedPage)) {
-                setSelectedPage(savedPage); // Восстанавливаем активную вкладку
+                setSelectedPage(savedPage);
             } else {
-                setSelectedPage('home'); // Если ничего не сохранено, выбираем `home`
+                setSelectedPage('home');
             }
 
-            // Устанавливаем минимальную задержку для скелетона
-            setTimeout(() => setIsLoading(false), 1000);
+            const elapsedTime = Date.now() - startTime;
+            const delay = Math.max(1000 - elapsedTime, 0);
+            setTimeout(() => setIsPagesLoading(false), delay);
         };
 
         fetchPages();
     }, []);
 
-    // Обработчик для сохранения выбранной страницы в `localStorage`
+    useEffect(() => {
+        if (!selectedPage || isPagesLoading) return;
+
+        setIsPageContentLoading(true);
+        const fetchPageContent = async () => {
+            const startTime = Date.now();
+            const supabase = createClient();
+            const { error } = await supabase
+                .from(selectedPage)
+                .select('*');
+
+            if (error) {
+                //console.error(`Failed to fetch content for ${selectedPage}:`, error.message);
+            }
+
+            const elapsedTime = Date.now() - startTime;
+            const delay = Math.max(0 - elapsedTime, 0);
+            setTimeout(() => setIsPageContentLoading(false), delay);
+        };
+
+        fetchPageContent();
+    }, [selectedPage, isPagesLoading]);
+
     const handlePageSelection = (page: string) => {
         setSelectedPage(page);
-        localStorage.setItem('selectedPage', page); // Сохраняем в localStorage
+        localStorage.setItem('selectedPage', page);
     };
 
     return (
         <div className="flex w-full">
-            {/* Секция с Listbox */}
-            <div className="w-1/4">
-                {isLoading ? (
+            <div className="min-w-[200px]">
+                {isPagesLoading ? (
                     <SkeletonList />
                 ) : (
                     <Listbox
                         variant="faded"
-                        onAction={(key) => handlePageSelection(key as string)} // Вызываем handlePageSelection
-                        className="w-full p-0"
+                        onAction={(key) => handlePageSelection(key as string)}
+                        className="p-0"
                         aria-label="Выбор страницы"
                     >
                         {pages.map((page) => (
@@ -90,65 +114,19 @@ export default function PagesData() {
                 )}
             </div>
 
-            {/* Содержимое выбранной страницы */}
             <div className="flex-grow ml-5 -bg-blue-50 -p-2">
-                {isLoading ? (
-                    <Skeleton className="w-full -bg-blue-50 h-[200px] rounded" /> // Скелетон вместо содержимого
+                {isPageContentLoading ? (
+                    <SkeletonPageContent />
                 ) : (
-                    <PageContent pageKey={selectedPage!} />
+                    <PageContent
+                        pageKey={selectedPage!}
+                        onLoadComplete={() => setIsPageContentLoading(false)} // Отключение скелетона
+                    />
                 )}
             </div>
         </div>
     );
 }
-
-
-
-
-function PageContent({ pageKey }: { pageKey: string }) {
-    return (
-        <div className="p-0">
-            <p>Содержимое страницы: {pageKey}</p>
-        </div>
-    );
-}
-
-
-function PageDetails({ pageKey }: { pageKey: string }) {
-    const [content, setContent] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchContent = async () => {
-            const supabase = createClient();
-            const { data, error } = await supabase
-                .from(pageKey)
-                .select('*');
-
-            if (error) {
-                console.error(`Failed to fetch content for ${pageKey}:`, error.message);
-                setContent(''); // Пустая информация, если таблица отсутствует
-            } else {
-                setContent(JSON.stringify(data, null, 2)); // Преобразуем данные для отображения
-            }
-
-            setIsLoading(false);
-        };
-
-        fetchContent();
-    }, [pageKey]);
-
-    if (isLoading) {
-        return <Skeleton className="w-full h-40 rounded" />;
-    }
-
-    return (
-        <div className="p-0">
-            {content ? <pre>{content}</pre> : <p>Нет данных для отображения</p>}
-        </div>
-    );
-}
-
 
 function SkeletonList() {
     return (
@@ -160,4 +138,113 @@ function SkeletonList() {
     );
 }
 
+function SkeletonPageContent() {
+    return (
+        <Skeleton className="w-full h-[200px]  rounded -bg-blue-50" />
+    );
+}
 
+function PageContent({ pageKey, onLoadComplete }: { pageKey: string; onLoadComplete: () => void }) {
+    const [content, setContent] = useState<{ ru: string; uk: string; item_id: string }[] | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchContent = async () => {
+            const startTime = Date.now(); // Засекаем время начала
+            const supabase = createClient();
+            const { data, error } = await supabase.from(pageKey).select('item_id, ru, uk');
+
+            if (error) {
+                //console.error(`Failed to fetch content for ${pageKey}:`, error.message);
+                setContent([]);
+            } else {
+                setContent(data || []);
+            }
+
+            const elapsedTime = Date.now() - startTime; // Время, затраченное на загрузку данных
+            const delay = Math.max(500 - elapsedTime, 0); // Минимальная задержка 500 мс
+            setTimeout(() => {
+                setIsLoading(false);
+                onLoadComplete(); // Уведомляем, что загрузка завершена
+            }, delay);
+        };
+
+        fetchContent();
+    }, [pageKey, onLoadComplete]);
+
+    if (isLoading) {
+        return                     <SkeletonPageContent />
+
+    }
+
+    if (!content || content.length === 0) {
+        return <p>Нет данных для отображения</p>;
+    }
+
+    return (
+        <Table
+            aria-label="Example table with editing functionality"
+            className="table-auto w-full"
+            isStriped
+        >
+            <TableHeader>
+                {/* Колонка item_id */}
+                <TableColumn className="w-1/6 border-r border-gray-300 text-center">
+                    ID
+                </TableColumn>
+
+                {/* Колонка RU */}
+                <TableColumn className="w-1/3 border-r border-gray-300 text-center">
+                    RU
+                </TableColumn>
+
+                {/* Колонка sync */}
+                <TableColumn className="w-1/12 border-r border-gray-300 text-center">
+                    sync
+                </TableColumn>
+
+                {/* Колонка UK */}
+                <TableColumn className="w-1/3 text-center">
+                    UK
+                </TableColumn>
+            </TableHeader>
+            <TableBody>
+                {content.map((row, index) => (
+                    <TableRow key={index}>
+                        {/* Колонка item_id */}
+                        <TableCell className="w-1/6 border-r border-gray-300 text-center">
+                            {row.item_id}
+                        </TableCell>
+
+                        {/* Левая колонка (RU) */}
+                        <TableCell className="w-1/3 border-r border-gray-300">
+                            <div className="flex items-center justify-between">
+                                {row.ru}
+                                <button className="text-blue-500 hover:text-blue-700 ml-2">
+                                    <Edit className="inline h-4 w-4" />
+                                </button>
+                            </div>
+                        </TableCell>
+
+                        {/* Средняя колонка (Иконка синхронизации) */}
+                        <TableCell className="w-1/12 border-r border-gray-300 text-center">
+                            <button className="text-gray-500 hover:text-gray-700">
+                                <RefreshCcw className="inline h-4 w-4" />
+                            </button>
+                        </TableCell>
+
+                        {/* Правая колонка (UK) */}
+                        <TableCell className="w-1/3">
+                            <div className="flex items-center justify-between">
+                                {row.uk}
+                                <button className="text-blue-500 hover:text-blue-700 ml-2">
+                                    <Edit className="inline h-4 w-4" />
+                                </button>
+                            </div>
+                        </TableCell>
+                    </TableRow>
+                ))}
+            </TableBody>
+        </Table>
+    );
+}

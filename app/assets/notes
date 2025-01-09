@@ -1,0 +1,13 @@
+-- Создаём таблицу
+CREATE TABLE your_table_name (
+    id SERIAL PRIMARY KEY,              -- Автоинкрементный идентификатор (int4)
+    item_id TEXT NOT NULL,              -- Текстовый идентификатор, заполняемый пользователем
+    ru TEXT,                            -- Поле для русского текста
+    uk TEXT                            -- Поле для украинского текста
+);
+
+-- Вставляем две строки
+INSERT INTO your_table_name (item_id, ru, uk)
+VALUES
+    ('title', 'Title страницы', 'Title страницы - UA'),
+    ('content', 'Содержание страницы', 'Содержание страницы - UA');
