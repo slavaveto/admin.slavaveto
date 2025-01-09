@@ -2,3 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Светлая тема */
+html.light {
+    @apply bg-light-background text-light-text;
+}
+/* Тёмная тема (через класс dark) */
+html.dark {
+    @apply bg-dark-background text-dark-text;
+}
+
+/* Глобальный класс для header и footer */
+.footer_bg {
+    @apply bg-footerLight/* Для светлой темы */
+}
+.dark .footer_bg {
+    @apply bg-footerDark/* Для тёмной темы */
+}

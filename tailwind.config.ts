@@ -24,11 +24,21 @@ const config = {
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
 
-
-        secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+        // Светлая тема
+        light: {
+          background: '#ffffff', // Фон светлой темы
+          text: '#212936', // Текст светлой темы
         },
+        // Тёмная тема
+        dark: {
+          background: '#1e2329', // Фон тёмной темы
+          text: '#a7adba', // Текст тёмной темы
+        },
+
+        footerLight: '#e5e6e6', // Фон для светлой темы
+        footerDark: '#16191e', // Фон для тёмной темы
+
+
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",

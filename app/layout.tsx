@@ -1,13 +1,7 @@
-import DeployButton from "@/app/assets/auth/components/deploy-button";
-import { EnvVarWarning } from "@/app/assets/auth/components/env-var-warning";
-import HeaderAuth from "@/app/assets/auth/components/header-auth";
-import { ThemeSwitcher } from "@/app/assets/auth/components/theme-switcher";
-import { hasEnvVars } from "@/app/assets/auth/utils/supabase/check-env-vars";
-import { Geist } from "next/font/google";
-import { ThemeProvider } from "next-themes";
-import Link from "next/link";
+import { Montserrat } from 'next/font/google';
 import "./globals.css";
 import { Providers } from "@/app/components/Providers";
+import { themeScript } from "@/app/assets/themeScript";
 
 
 const defaultUrl = process.env.VERCEL_URL
@@ -18,12 +12,16 @@ export const metadata = {
   metadataBase: new URL(defaultUrl),
   title: "Next.js and Supabase Starter Kit",
   description: "The fastest way to build apps with Next.js and Supabase",
+  icons: {
+    icon: "/favicon.ico"
+  },
 };
 
-const geistSans = Geist({
+const montserrat = Montserrat({
   display: "swap",
   subsets: ["latin"],
 });
+
 
 export default function RootLayout({
   children,
@@ -31,8 +29,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={geistSans.className} suppressHydrationWarning>
-    <body className="bg-background text-foreground">
+    <html lang="en" className={montserrat.className} suppressHydrationWarning>
+    <head>
+      <script
+          dangerouslySetInnerHTML={{
+            __html: themeScript,
+          }}
+      />
+
+
+    </head>
+    <body className="">
 
 
     <Providers>
@@ -44,5 +51,5 @@ export default function RootLayout({
 
     </body>
     </html>
-);
+  );
 }
