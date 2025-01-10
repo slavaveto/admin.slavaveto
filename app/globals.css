@@ -2,6 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
+
+
+
+.table-container {
+    transition: opacity 0.5s ease-in-out;
+}
+
+.table-container.fade-out {
+    opacity: 0;
+}
+
+.table-container.fade-in {
+    opacity: 1;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* Светлая тема */
 html.light {
     @apply bg-light-background text-light-text;

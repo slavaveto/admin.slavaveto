@@ -6,6 +6,7 @@ import {hasEnvVars} from "@/app/assets/auth/utils/supabase/check-env-vars";
 import {EnvVarWarning} from "@/app/assets/auth/components/env-var-warning";
 import HeaderAuth from "@/app/assets/auth/components/header-auth";
 import ThemeToggle from "@/app/components/sys/ThemeToggle";
+import { Toaster } from 'react-hot-toast';
 
 
 
@@ -45,7 +46,7 @@ export default function RootLayout({
     </head>
     <body className="">
 
-
+    <Toaster />
     <Providers>
       <div className="flex flex-col min-h-svh">
         <header className=" footer_bg backdrop-blur-xl py-[10px]"
