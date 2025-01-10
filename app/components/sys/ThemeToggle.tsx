@@ -3,7 +3,7 @@
 import { Tabs, Tab } from '@nextui-org/react';
 import { LightThemeIcon, DarkThemeIcon, AutoThemeIcon } from '@/app/assets/svgIcons';
 import React from 'react';
-import { useTheme } from '@/app/components/ThemeProvider';
+import { useTheme } from '@/app/components/sys/ThemeProvider';
 
 const ThemeToggle: React.FC = () => {
     const { theme, setTheme } = useTheme();
