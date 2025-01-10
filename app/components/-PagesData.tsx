@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/app/assets/auth/utils/supabase/client';
 import { Listbox, ListboxItem, Skeleton } from '@nextui-org/react';
+import {Button} from "@nextui-org/button";
+import {Link} from "@nextui-org/link";
+import EditModal from './EditModal';
 
 import { Edit, RefreshCcw } from 'lucide-react';
 import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from '@nextui-org/react';
@@ -197,15 +200,14 @@ function PageContent({ pageKey, onLoadComplete }: { pageKey: string; onLoadCompl
                 <TableColumn className="w-1/3 border-r border-gray-300 text-center">
                     RU
                 </TableColumn>
-
-                {/* Колонка sync */}
-                <TableColumn className="w-1/12 border-r border-gray-300 text-center">
-                    sync
-                </TableColumn>
-
                 {/* Колонка UK */}
                 <TableColumn className="w-1/3 text-center">
                     UK
+                </TableColumn>
+
+                {/* Колонка sync */}
+                <TableColumn className="w-1/12 border-l border-gray-300 text-center">
+                    edit
                 </TableColumn>
             </TableHeader>
             <TableBody>
@@ -220,28 +222,30 @@ function PageContent({ pageKey, onLoadComplete }: { pageKey: string; onLoadCompl
                         <TableCell className="w-1/3 border-r border-gray-300">
                             <div className="flex items-center justify-between">
                                 {row.ru}
-                                <button className="text-blue-500 hover:text-blue-700 ml-2">
-                                    <Edit className="inline h-4 w-4" />
-                                </button>
+                                {/*<button className="text-blue-500 hover:text-blue-700 ml-2">*/}
+                                {/*    <Edit className="inline h-4 w-4" />*/}
+                                {/*</button>*/}
                             </div>
                         </TableCell>
 
-                        {/* Средняя колонка (Иконка синхронизации) */}
-                        <TableCell className="w-1/12 border-r border-gray-300 text-center">
-                            <button className="text-gray-500 hover:text-gray-700">
-                                <RefreshCcw className="inline h-4 w-4" />
-                            </button>
-                        </TableCell>
 
                         {/* Правая колонка (UK) */}
                         <TableCell className="w-1/3">
                             <div className="flex items-center justify-between">
                                 {row.uk}
-                                <button className="text-blue-500 hover:text-blue-700 ml-2">
-                                    <Edit className="inline h-4 w-4" />
-                                </button>
+                                {/*<button className="text-blue-500 hover:text-blue-700 ml-2">*/}
+                                {/*    <Edit className="inline h-4 w-4" />*/}
+                                {/*</button>*/}
                             </div>
                         </TableCell>
+
+                        {/* Средняя колонка (Иконка синхронизации) */}
+                        <TableCell className="w-1/12 border-l border-gray-300 text-center">
+                            <Link href="#" color="primary" className=" ml-2">
+                                <Edit className="inline h-4 w-4"/>
+                            </Link>
+                        </TableCell>
+
                     </TableRow>
                 ))}
             </TableBody>

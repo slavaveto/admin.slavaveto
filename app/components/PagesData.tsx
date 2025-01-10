@@ -3,6 +3,10 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/app/assets/auth/utils/supabase/client';
 import { Listbox, ListboxItem, Skeleton } from '@nextui-org/react';
+import { Button, Modal, ModalBody,ModalContent, ModalHeader, ModalFooter, useDisclosure,  } from '@nextui-org/react';
+
+import {Link} from "@nextui-org/link";
+import EditModal from './EditModal';
 
 import { Edit, RefreshCcw } from 'lucide-react';
 import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from '@nextui-org/react';
@@ -87,7 +91,8 @@ export default function PagesData() {
 
     return (
         <div className="flex w-full">
-            <div className="min-w-[200px]">
+
+                        <div className="min-w-[200px]">
                 {isPagesLoading ? (
                     <SkeletonList />
                 ) : (
@@ -144,37 +149,54 @@ function SkeletonPageContent() {
     );
 }
 
-function PageContent({ pageKey, onLoadComplete }: { pageKey: string; onLoadComplete: () => void }) {
+interface PageContentProps {
+    pageKey: string;
+    onLoadComplete: () => void;
+}
+
+function PageContent({ pageKey, onLoadComplete }: PageContentProps) {
     const [content, setContent] = useState<{ ru: string; uk: string; item_id: string }[] | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingRow, setEditingRow] = useState<{ ru: string; uk: string; item_id: string } | null>(null);
 
     useEffect(() => {
         const fetchContent = async () => {
-            const startTime = Date.now(); // Засекаем время начала
             const supabase = createClient();
             const { data, error } = await supabase.from(pageKey).select('item_id, ru, uk');
 
             if (error) {
-                //console.error(`Failed to fetch content for ${pageKey}:`, error.message);
+                console.error(`Failed to fetch content for ${pageKey}:`, error.message);
                 setContent([]);
             } else {
                 setContent(data || []);
             }
 
-            const elapsedTime = Date.now() - startTime; // Время, затраченное на загрузку данных
-            const delay = Math.max(500 - elapsedTime, 0); // Минимальная задержка 500 мс
-            setTimeout(() => {
-                setIsLoading(false);
-                onLoadComplete(); // Уведомляем, что загрузка завершена
-            }, delay);
+            setIsLoading(false);
+            onLoadComplete();
         };
 
         fetchContent();
     }, [pageKey, onLoadComplete]);
 
-    if (isLoading) {
-        return                     <SkeletonPageContent />
+    const handleEditClick = (row: { ru: string; uk: string; item_id: string }) => {
+        setEditingRow(row);
+        setIsModalOpen(true);
+    };
 
+    const handleSave = (ru: string, uk: string) => {
+        console.log('Saved:', { ru, uk });
+        // Здесь добавьте логику сохранения
+        setIsModalOpen(false);
+    };
+
+    const handleClose = () => {
+        setIsModalOpen(false);
+        setEditingRow(null);
+    };
+
+    if (isLoading) {
+        return <p>Loading...</p>;
     }
 
     if (!content || content.length === 0) {
@@ -182,69 +204,39 @@ function PageContent({ pageKey, onLoadComplete }: { pageKey: string; onLoadCompl
     }
 
     return (
-        <Table
-            aria-label="Example table with editing functionality"
-            className="table-auto w-full"
-            isStriped
-        >
-            <TableHeader>
-                {/* Колонка item_id */}
-                <TableColumn className="w-1/6 border-r border-gray-300 text-center">
-                    ID
-                </TableColumn>
-
-                {/* Колонка RU */}
-                <TableColumn className="w-1/3 border-r border-gray-300 text-center">
-                    RU
-                </TableColumn>
-
-                {/* Колонка sync */}
-                <TableColumn className="w-1/12 border-r border-gray-300 text-center">
-                    sync
-                </TableColumn>
-
-                {/* Колонка UK */}
-                <TableColumn className="w-1/3 text-center">
-                    UK
-                </TableColumn>
-            </TableHeader>
-            <TableBody>
-                {content.map((row, index) => (
-                    <TableRow key={index}>
-                        {/* Колонка item_id */}
-                        <TableCell className="w-1/6 border-r border-gray-300 text-center">
-                            {row.item_id}
-                        </TableCell>
-
-                        {/* Левая колонка (RU) */}
-                        <TableCell className="w-1/3 border-r border-gray-300">
-                            <div className="flex items-center justify-between">
-                                {row.ru}
-                                <button className="text-blue-500 hover:text-blue-700 ml-2">
+        <>
+            <Table aria-label="Example table with editing functionality" className="table-auto w-full" isStriped>
+                <TableHeader>
+                    <TableColumn>ID</TableColumn>
+                    <TableColumn>RU</TableColumn>
+                    <TableColumn>UK</TableColumn>
+                    <TableColumn>Edit</TableColumn>
+                </TableHeader>
+                <TableBody>
+                    {content.map((row, index) => (
+                        <TableRow key={index}>
+                            <TableCell>{row.item_id}</TableCell>
+                            <TableCell>{row.ru}</TableCell>
+                            <TableCell>{row.uk}</TableCell>
+                            <TableCell>
+                                <Button
+                                    className="text-blue-500 hover:text-blue-700"
+                                    onPress={() => handleEditClick(row)}
+                                >
                                     <Edit className="inline h-4 w-4" />
-                                </button>
-                            </div>
-                        </TableCell>
+                                </Button>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
 
-                        {/* Средняя колонка (Иконка синхронизации) */}
-                        <TableCell className="w-1/12 border-r border-gray-300 text-center">
-                            <button className="text-gray-500 hover:text-gray-700">
-                                <RefreshCcw className="inline h-4 w-4" />
-                            </button>
-                        </TableCell>
-
-                        {/* Правая колонка (UK) */}
-                        <TableCell className="w-1/3">
-                            <div className="flex items-center justify-between">
-                                {row.uk}
-                                <button className="text-blue-500 hover:text-blue-700 ml-2">
-                                    <Edit className="inline h-4 w-4" />
-                                </button>
-                            </div>
-                        </TableCell>
-                    </TableRow>
-                ))}
-            </TableBody>
-        </Table>
+            <EditModal
+                isOpen={isModalOpen}
+                onClose={handleClose}
+                onSave={handleSave}
+                initialValues={editingRow}
+            />
+        </>
     );
 }

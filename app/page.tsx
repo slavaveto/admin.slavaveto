@@ -1,8 +1,9 @@
 
 import ConnectSupabaseSteps from "@/app/assets/auth/components/tutorial/connect-supabase-steps";
 import ConnectToBase from "@/app/components/ConnectToBase";
-import {Spinner} from "@nextui-org/react";
+import {Modal, ModalBody, Spinner} from "@nextui-org/react";
 import {Button} from "@nextui-org/button";
+import {Link} from "@nextui-org/react";
 
 import ThemeToggle from "@/app/components/ThemeToggle";
 
