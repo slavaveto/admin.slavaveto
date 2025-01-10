@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { createClient } from '@/app/assets/auth/utils/supabase/client';
-import { Listbox, ListboxItem, Skeleton } from '@nextui-org/react';
-import {Button} from "@nextui-org/button";
-import {Link} from "@nextui-org/link";
-import EditModal from './EditModal';
+import {useState, useEffect} from 'react';
+import {createClient} from '@/app/assets/auth/utils/supabase/client';
+import {Listbox, ListboxItem, Skeleton, Button} from '@nextui-org/react';
 
-import { Edit, RefreshCcw } from 'lucide-react';
-import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from '@nextui-org/react';
+import {loadPages} from './LoadPages';
+import EditableTable from './EditableTable';
+import PageListbox from './PageListbox';
+import EditModal from './EditModal';
+import { toast } from 'react-hot-toast';
+
 
 interface Page {
     page_key: string;
@@ -16,49 +17,27 @@ interface Page {
     btn_type?: string;
 }
 
+interface Translation {
+    item_id: string;
+    ru: string;
+    uk: string;
+}
+
 export default function PagesData() {
-    const [pages, setPages] = useState<Page[]>([]);
-    const [selectedPage, setSelectedPage] = useState<string | null>(null);
-    const [isPagesLoading, setIsPagesLoading] = useState(true);
+
     const [isPageContentLoading, setIsPageContentLoading] = useState(true);
+    const {pages, selectedPage, isPagesLoading, handlePageSelection} = loadPages();
+    const [content, setContent] = useState<{ ru: string; uk: string; item_id: string }[] | null>(null);
 
-    useEffect(() => {
-        const fetchPages = async () => {
-            const startTime = Date.now();
-            const supabase = createClient();
-            const { data, error } = await supabase
-                .from('_pages')
-                .select('page_key, order, btn_type');
+    const [isSaving, setIsSaving] = useState(false); // Состояние загрузки сохранения
 
-            if (error) {
-                //console.error('Failed to fetch pages:', error.message);
-                return;
-            }
-
-            const allPages: Page[] = [
-                { page_key: 'home', order: -1 },
-                ...(data || [])
-                    .map((page) => ({ ...page, order: page.order ?? Infinity }))
-                    .sort((a, b) => a.order! - b.order!),
-                { page_key: 'misc', order: Infinity + 1 },
-            ];
-
-            setPages(allPages);
-
-            const savedPage = localStorage.getItem('selectedPage');
-            if (savedPage && allPages.find((page) => page.page_key === savedPage)) {
-                setSelectedPage(savedPage);
-            } else {
-                setSelectedPage('home');
-            }
-
-            const elapsedTime = Date.now() - startTime;
-            const delay = Math.max(1000 - elapsedTime, 0);
-            setTimeout(() => setIsPagesLoading(false), delay);
-        };
-
-        fetchPages();
-    }, []);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingRow, setEditingRow] = useState<{
+        ru: string;
+        uk: string;
+        item_id: string;
+        page: string | null; // Добавляем поле для страницы
+    } | null>(null);
 
     useEffect(() => {
         if (!selectedPage || isPagesLoading) return;
@@ -67,95 +46,10 @@ export default function PagesData() {
         const fetchPageContent = async () => {
             const startTime = Date.now();
             const supabase = createClient();
-            const { error } = await supabase
+            const {data, error} = await supabase
                 .from(selectedPage)
-                .select('*');
-
-            if (error) {
-                //console.error(`Failed to fetch content for ${selectedPage}:`, error.message);
-            }
-
-            const elapsedTime = Date.now() - startTime;
-            const delay = Math.max(0 - elapsedTime, 0);
-            setTimeout(() => setIsPageContentLoading(false), delay);
-        };
-
-        fetchPageContent();
-    }, [selectedPage, isPagesLoading]);
-
-    const handlePageSelection = (page: string) => {
-        setSelectedPage(page);
-        localStorage.setItem('selectedPage', page);
-    };
-
-    return (
-        <div className="flex w-full">
-            <div className="min-w-[200px]">
-                {isPagesLoading ? (
-                    <SkeletonList />
-                ) : (
-                    <Listbox
-                        variant="faded"
-                        onAction={(key) => handlePageSelection(key as string)}
-                        className="p-0"
-                        aria-label="Выбор страницы"
-                    >
-                        {pages.map((page) => (
-                            <ListboxItem
-                                key={page.page_key}
-                                textValue={page.page_key}
-                                className={`
-                                    ${selectedPage === page.page_key ? 'bg-default-100' : ''} 
-                                `}
-                            >
-                                <span className={page.btn_type === 'image' ? 'font-semibold' : ''}>
-                                    {page.page_key}
-                                </span>
-                            </ListboxItem>
-                        ))}
-                    </Listbox>
-                )}
-            </div>
-
-            <div className="flex-grow ml-5 -bg-blue-50 -p-2">
-                {isPageContentLoading ? (
-                    <SkeletonPageContent />
-                ) : (
-                    <PageContent
-                        pageKey={selectedPage!}
-                        onLoadComplete={() => setIsPageContentLoading(false)} // Отключение скелетона
-                    />
-                )}
-            </div>
-        </div>
-    );
-}
-
-function SkeletonList() {
-    return (
-        <div className="w-full flex flex-col gap-1">
-            <Skeleton className="h-[30px] w-12/12 rounded" />
-            <Skeleton className="h-[30px] w-10/12 rounded" />
-            <Skeleton className="h-[30px] w-11/12 rounded" />
-        </div>
-    );
-}
-
-function SkeletonPageContent() {
-    return (
-        <Skeleton className="w-full h-[200px]  rounded -bg-blue-50" />
-    );
-}
-
-function PageContent({ pageKey, onLoadComplete }: { pageKey: string; onLoadComplete: () => void }) {
-    const [content, setContent] = useState<{ ru: string; uk: string; item_id: string }[] | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchContent = async () => {
-            const startTime = Date.now(); // Засекаем время начала
-            const supabase = createClient();
-            const { data, error } = await supabase.from(pageKey).select('item_id, ru, uk');
+                .select('*')
+                .order('item_id', { ascending: false });
 
             if (error) {
                 //console.error(`Failed to fetch content for ${pageKey}:`, error.message);
@@ -164,91 +58,208 @@ function PageContent({ pageKey, onLoadComplete }: { pageKey: string; onLoadCompl
                 setContent(data || []);
             }
 
-            const elapsedTime = Date.now() - startTime; // Время, затраченное на загрузку данных
-            const delay = Math.max(500 - elapsedTime, 0); // Минимальная задержка 500 мс
-            setTimeout(() => {
-                setIsLoading(false);
-                onLoadComplete(); // Уведомляем, что загрузка завершена
-            }, delay);
+            const elapsedTime = Date.now() - startTime;
+            const delay = Math.max(600 - elapsedTime, 0);
+            setTimeout(() => setIsPageContentLoading(false), delay);
         };
 
-        fetchContent();
-    }, [pageKey, onLoadComplete]);
+        fetchPageContent();
+    }, [selectedPage, isPagesLoading]);
 
-    if (isLoading) {
-        return                     <SkeletonPageContent />
+    const handleEditClick = (row: { ru: string; uk: string; item_id: string }) => {
+        // Логика для обработки редактирования (например, открыть модальное окно)
+        const pageInfo = { ...row, page: selectedPage }; // Добавляем информацию о текущей странице
+        setEditingRow(pageInfo); // Обновляем редактируемую строку с учетом страницы
 
-    }
+        //setEditingRow(row);
+        setIsModalOpen(true);
+        console.log('Редактирование строки:', row);
+    };
 
-    if (!content || content.length === 0) {
-        return <p>Нет данных для отображения</p>;
-    }
+    const handleSave = async (ru: string, uk: string) => {
+        setIsSaving(true); // Устанавливаем состояние загрузки
+
+        if (!editingRow?.item_id || !editingRow?.page) {
+            console.error('Missing required information for saving');
+            setIsSaving(false);
+            return;
+        }
+
+        const startTime = Date.now(); // Засекаем время начала сохранения
+
+        try {
+            const supabase = createClient();
+
+            const { data, error } = await supabase
+                .from(editingRow.page)
+                .update({ ru, uk })
+                .eq('item_id', editingRow.item_id);
+
+            if (error) {
+                console.error('Error updating data:', error.message);
+                toast.error('Ошибка при сохранении данных.');
+            } else {
+                console.log('Updated successfully:', data);
+
+
+
+                const elapsedTime = Date.now() - startTime;
+                const delay = Math.max(1500 - elapsedTime, 0); // Минимальная задержка в 500 мс
+
+                // Добавляем задержку, если нужно
+                if (delay > 0) {
+                    await new Promise((resolve) => setTimeout(resolve, delay));
+                }
+
+                //toast.success('Данные успешно обновлены');
+            }
+        } catch (err) {
+            console.error('Unexpected error:', err);
+            toast.error('Неожиданная ошибка при сохранении.');
+        } finally {
+            setIsSaving(false); // Сбрасываем состояние загрузки
+            setIsModalOpen(false); // Закрываем модальное окно
+
+            setTimeout(() => {
+                toast.success('Данные успешно обновлены');
+                // Обновление состояния таблицы
+                setContent((prevContent) => {
+                    if (!prevContent) return prevContent;
+
+                    return prevContent.map((row) =>
+                        row.item_id === editingRow.item_id ? { ...row, ru, uk } : row
+                    );
+                });
+            }, 500); // Задержка перед появлением тоста
+        }
+    };
+
+
+    const handleCreate = async (item_id: string, ru: string, uk: string) => {
+        setIsSaving(true); // Устанавливаем состояние загрузки
+
+        if (!item_id || !selectedPage) {
+            console.error('Missing required information for creating');
+            setIsSaving(false);
+            return;
+        }
+
+        const startTime = Date.now(); // Засекаем время начала создания
+        //let createdData = null;
+        let createdData: Translation[] | null = null;
+
+        try {
+            const supabase = createClient();
+
+            const { data, error } = await supabase
+                .from(selectedPage)
+                .insert([{ item_id, ru, uk }]) // Вставляем новую запись
+                .select('*'); // Убедимся, что возвращаются вставленные данные
+
+            if (error) {
+                console.error('Error creating data:', error.message);
+                toast.error('Ошибка при создании данных.');
+            } else {
+                console.log('Created successfully:', data);
+                createdData = data; // Сохраняем созданные данные для обновления таблицы
+
+                const elapsedTime = Date.now() - startTime;
+                const delay = Math.max(1500 - elapsedTime, 0); // Минимальная задержка в 500 мс
+
+                // Добавляем задержку, если нужно
+                if (delay > 0) {
+                    await new Promise((resolve) => setTimeout(resolve, delay));
+                }
+            }
+        } catch (err) {
+            console.error('Unexpected error:', err);
+            toast.error('Неожиданная ошибка при создании.');
+        } finally {
+            setIsSaving(false); // Сбрасываем состояние загрузки
+            setIsModalOpen(false); // Закрываем модальное окно
+
+            setTimeout(() => {
+                // Обновляем состояние таблицы перед показом тоста
+                if (createdData) {
+                    setContent((prevContent) => {
+                        const updatedContent = [...(createdData || []), ...(prevContent || [])];
+                        console.log('Updated content:', updatedContent); // Для отладки
+                        return updatedContent;
+                    });
+                }
+                toast.success('Данные успешно созданы');
+            }, 500); // Задержка перед появлением тоста
+        }
+    };
+
+    const handleClose = () => {
+        setIsModalOpen(false);
+        setEditingRow(null);
+    };
 
     return (
-        <Table
-            aria-label="Example table with editing functionality"
-            className="table-auto w-full"
-            isStriped
-        >
-            <TableHeader className="p-0 m-0">
-                {/* Колонка item_id */}
-                <TableColumn className="w-1/6 border-r border-gray-300 text-center">
-                    ID
-                </TableColumn>
+        <div className="flex w-full">
 
-                {/* Колонка RU */}
-                <TableColumn className="w-1/3 border-r border-gray-300 text-center">
-                    RU
-                </TableColumn>
-                {/* Колонка UK */}
-                <TableColumn className="w-1/3 text-center">
-                    UK
-                </TableColumn>
+            <div className="min-w-[200px]">
+                <Button
+                    color="primary"
+                    onPress={() => {
+                        setEditingRow({ ru: '', uk: '', item_id: '', page: selectedPage }); // Передаём пустую запись с текущей страницей
+                        setIsModalOpen(true); // Открываем модальное окно
+                    }}
+                >
+                    Add New Translation
+                </Button>
+                {isPagesLoading ? (
+                    <SkeletonList/>
+                ) : (
+                    <PageListbox
+                        pages={pages}
+                        selectedPage={selectedPage}
+                        onSelectPage={handlePageSelection}
+                    />
+                )}
+            </div>
 
-                {/* Колонка sync */}
-                <TableColumn className="w-1/12 border-l border-gray-300 text-center">
-                    edit
-                </TableColumn>
-            </TableHeader>
-            <TableBody>
-                {content.map((row, index) => (
-                    <TableRow key={index}>
-                        {/* Колонка item_id */}
-                        <TableCell className="w-1/6 border-r border-gray-300 text-center">
-                            {row.item_id}
-                        </TableCell>
-
-                        {/* Левая колонка (RU) */}
-                        <TableCell className="w-1/3 border-r border-gray-300">
-                            <div className="flex items-center justify-between">
-                                {row.ru}
-                                {/*<button className="text-blue-500 hover:text-blue-700 ml-2">*/}
-                                {/*    <Edit className="inline h-4 w-4" />*/}
-                                {/*</button>*/}
-                            </div>
-                        </TableCell>
-
-
-                        {/* Правая колонка (UK) */}
-                        <TableCell className="w-1/3">
-                            <div className="flex items-center justify-between">
-                                {row.uk}
-                                {/*<button className="text-blue-500 hover:text-blue-700 ml-2">*/}
-                                {/*    <Edit className="inline h-4 w-4" />*/}
-                                {/*</button>*/}
-                            </div>
-                        </TableCell>
-
-                        {/* Средняя колонка (Иконка синхронизации) */}
-                        <TableCell className="w-1/12 border-l border-gray-300 text-center">
-                            <Link href="#" color="primary" className=" ml-2">
-                                <Edit className="inline h-4 w-4"/>
-                            </Link>
-                        </TableCell>
-
-                    </TableRow>
-                ))}
-            </TableBody>
-        </Table>
+            <div className="flex-grow ml-5 -bg-blue-50 -p-2">
+                {isPageContentLoading ? (
+                    <SkeletonPageContent/>
+                ) : (
+                    <>
+                        {content && content.length > 0 ? (
+                            <EditableTable content={content} onEdit={handleEditClick} />
+                        ) : (
+                            <p>Нет данных для отображения</p>
+                        )}
+                    </>
+                )}
+            </div>
+            <EditModal
+                isOpen={isModalOpen}
+                onClose={handleClose}
+                onSave={handleSave}
+                onCreate={handleCreate} // Передаем функцию создания
+                initialValues={editingRow || { ru: '', uk: '', item_id: '', page: null }}
+                isSaving={isSaving}
+                mode={editingRow?.item_id ? 'edit' : 'create'}
+            />
+        </div>
     );
 }
+
+function SkeletonList() {
+    return (
+        <div className="w-full flex flex-col gap-1">
+            <Skeleton className="h-[30px] w-12/12 rounded"/>
+            <Skeleton className="h-[30px] w-10/12 rounded"/>
+            <Skeleton className="h-[30px] w-11/12 rounded"/>
+        </div>
+    );
+}
+
+function SkeletonPageContent() {
+    return (
+        <Skeleton className="w-full h-[200px]  rounded -bg-blue-50"/>
+    );
+}
+

@@ -1,6 +1,6 @@
 'use client';
 
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from '@nextui-org/react';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input } from '@nextui-org/react';
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 
@@ -50,18 +50,20 @@ export default function EditModal({ isOpen, onClose, onSave, isSaving, initialVa
                             <p><strong>ID:</strong> {initialValues?.item_id}</p>
                             <div className="mt-4">
                                 <label className="block mb-2">RU</label>
-                                <input
+                                <Input
+                                    variant="bordered"
+                                    color="primary"
                                     type="text"
-                                    className="w-full p-2 border rounded"
                                     value={ru}
                                     onChange={(e) => setRu(e.target.value)}
                                 />
                             </div>
                             <div className="mt-4">
                                 <label className="block mb-2">UK</label>
-                                <input
+                                <Input
+                                    variant="bordered"
+                                    color="primary"
                                     type="text"
-                                    className="w-full p-2 border rounded"
                                     value={uk}
                                     onChange={(e) => setUk(e.target.value)}
                                 />

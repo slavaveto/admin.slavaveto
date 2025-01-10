@@ -57,7 +57,7 @@ export default function PagesData() {
             }
 
             const elapsedTime = Date.now() - startTime;
-            const delay = Math.max(1000 - elapsedTime, 0);
+            const delay = Math.max(600 - elapsedTime, 0);
             setTimeout(() => setIsPageContentLoading(false), delay);
         };
 

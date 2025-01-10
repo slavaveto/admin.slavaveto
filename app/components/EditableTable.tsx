@@ -3,13 +3,16 @@
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@nextui-org/react';
 import { Link } from '@nextui-org/link';
 import { Edit } from 'lucide-react';
+import {useAsyncList} from "@react-stately/data";
 
 interface EditableTableProps {
     content: { ru: string; uk: string; item_id: string }[];
     onEdit: (row: { ru: string; uk: string; item_id: string }) => void; // Колбэк для редактирования
 }
 
+
 export default function EditableTable({ content, onEdit }: EditableTableProps) {
+
     return (
         <Table
             aria-label="Example table with editing functionality"
@@ -18,13 +21,13 @@ export default function EditableTable({ content, onEdit }: EditableTableProps) {
         >
             <TableHeader className="p-0 m-0">
                 {/* Колонка item_id */}
-                <TableColumn className="w-1/6 border-r border-default-300 text-center">ID</TableColumn>
+                <TableColumn className="w-1/6 border-r border-default-300 text-center" allowsSorting>ID</TableColumn>
 
                 {/* Колонка RU */}
-                <TableColumn className="w-1/3 border-r border-default-300 text-center">RU</TableColumn>
+                <TableColumn className="w-1/3 border-r border-default-300 text-center" allowsSorting>RU</TableColumn>
 
                 {/* Колонка UK */}
-                <TableColumn className="w-1/3 text-center">UK</TableColumn>
+                <TableColumn className="w-1/3 text-center" allowsSorting>UK</TableColumn>
 
                 {/* Колонка edit */}
                 <TableColumn className="w-1/12 border-l border-default-300 text-center">Edit</TableColumn>
