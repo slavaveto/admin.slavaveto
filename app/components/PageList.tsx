@@ -7,7 +7,7 @@ interface Page {
     btn_type?: string;
 }
 
-export function loadPages() {
+export function pageList() {
     const [pages, setPages] = useState<Page[]>([]);
     const [selectedPage, setSelectedPage] = useState<string | null>(null);
     const [isPagesLoading, setIsPagesLoading] = useState(true);

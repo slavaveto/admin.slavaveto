@@ -12,7 +12,7 @@ interface PageListboxProps {
     onSelectPage: (pageKey: string) => void;
 }
 
-export default function PageListbox({ pages, selectedPage, onSelectPage }: PageListboxProps) {
+export default function PageListBox({ pages, selectedPage, onSelectPage }: PageListboxProps) {
     return (
         <Listbox
             variant="faded"

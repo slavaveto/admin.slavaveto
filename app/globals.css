@@ -5,16 +5,10 @@
 
 
 
-.table-container {
-    transition: opacity 0.5s ease-in-out;
-}
 
-.table-container.fade-out {
-    opacity: 0;
-}
 
-.table-container.fade-in {
-    opacity: 1;
+.ck-powered-by {
+    display: none !important;
 }
 
 
