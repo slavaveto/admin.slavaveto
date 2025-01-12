@@ -2,6 +2,7 @@
 
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import BalloonEditor from '@ckeditor/ckeditor5-build-balloon';
+import React, { useState } from 'react';
 
 import 'ckeditor5/ckeditor5.css';
 import 'ckeditor5-premium-features/ckeditor5-premium-features.css';
@@ -12,21 +13,34 @@ interface CustomEditorProps {
 }
 
 const CustomEditor = ({ data, onChange }: CustomEditorProps) => {
-    return (
-        <CKEditor
-            editor={BalloonEditor}
-            data={data} // Задаём начальные данные через data
-            config={{
-                licenseKey: 'GPL',
-                toolbar: ['undo', 'redo', '|', 'bold', 'italic'],
-                removePlugins: ['CKEditorInspector', 'EasyImage'], // Убираем ненужные плагины
-            }}
-            onChange={(event, editor) => {
-                const newData = editor.getData();
-                onChange(newData); // Вызываем функцию обратного вызова при изменении данных
-            }}
-        />
-    );
-};
+    const [isEditorReady, setIsEditorReady] = useState(false);
 
-export default CustomEditor;
+    return (
+        <div
+            style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+            className={`editor-wrapper ${isEditorReady ? 'editor-ready' : 'editor-loading'}`}
+        >
+            <CKEditor
+                editor={BalloonEditor}
+                //@ts-ignore
+                data={data as any}// Задаём начальные данные через data
+                config={{
+                    licenseKey: 'GPL',
+                    toolbar: ['undo', 'redo', '|', 'bold', 'italic'],
+                    removePlugins: ['CKEditorInspector', 'EasyImage'], // Убираем ненужные плагины
+                    //initialData:{data}
+                }}
+                onChange={(event, editor) => {
+                    const newData = editor.getData();
+                    onChange(newData); // Вызываем функцию обратного вызова при изменении данных
+                }}
+                onReady={(editor) => {
+                    //console.log('Editor is ready', editor);
+                    setIsEditorReady(true); // Устанавливаем флаг, что редактор готов
+                }}
+            />
+        </div>
+            );
+            };
+
+            export default CustomEditor;

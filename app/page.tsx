@@ -3,7 +3,7 @@ import { createClient } from "@/app/assets/auth/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { hasEnvVars } from "@/app/assets/auth/utils/supabase/check-env-vars";
 
-import MainPage from "@/app/components/MainPage";
+import Main from "@/app/components/Main";
 
 export default async function Home() {
     if (hasEnvVars) {
@@ -19,7 +19,7 @@ export default async function Home() {
         return (
             <main className="flex flex-grow container mx-auto px-3 max-w-screen-lg">
 
-                    <MainPage />
+                    <Main />
 
             </main>
         );

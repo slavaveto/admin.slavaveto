@@ -3,7 +3,7 @@ import { createClient } from "@/app/assets/auth/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { hasEnvVars } from "@/app/assets/auth/utils/supabase/check-env-vars";
 
-import PageData from "./PageData";
+import ChatGPTTest from "./ChatGPTTest";
 
 export default async function Home() {
     if (hasEnvVars) {
@@ -20,7 +20,10 @@ export default async function Home() {
             <main className="flex flex-grow container mx-auto px-3 max-w-screen-lg">
                 <div className="flex w-full flex-col">
                     <h1 className="text-xl font-bold my-4 pl-2">Edit Pages Info</h1>
-                    <PageData />
+
+                    <ChatGPTTest />
+
+
                 </div>
             </main>
         );

@@ -4,6 +4,7 @@ import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Checkb
 import { Link } from '@nextui-org/link';
 import { Edit, Trash, CirclePlus } from 'lucide-react';
 import {useAsyncList} from "@react-stately/data";
+import {ScrollShadow} from "@nextui-org/react";
 
 interface EditableTableProps {
     content: { ru: string; uk: string; item_id: string; is_rich: boolean }[];
@@ -13,6 +14,15 @@ interface EditableTableProps {
 }
 
 export default function MainTable({ content, onEdit, onDelete, onToggleRich }: EditableTableProps) {
+
+    const HtmlString = ({text}: { text: string }) => (
+        <span dangerouslySetInnerHTML={{__html: text}}/>
+    );
+
+    // const HtmlString = ({ text }: { text: string }) => (
+    //     <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(text) }} />
+    // );
+
 
     return (
         <Table
@@ -46,16 +56,16 @@ export default function MainTable({ content, onEdit, onDelete, onToggleRich }: E
 
                         {/* Левая колонка (RU) */}
                         <TableCell className="w-1/3 border-r border-default-300">
-                            <div className="flex items-center justify-between">
-                                {row.ru}
-                            </div>
+                            <ScrollShadow className="rich-text flex items-start">
+                                <HtmlString text= {row.ru}/>
+                            </ScrollShadow>
                         </TableCell>
 
                         {/* Правая колонка (UK) */}
                         <TableCell className="w-1/3">
-                            <div className="flex items-center justify-between">
-                                {row.uk}
-                            </div>
+                                <ScrollShadow className="rich-text flex items-start">
+                                    <HtmlString text= {row.uk}/>
+                                </ScrollShadow>
                         </TableCell>
 
                         {/* Колонка is_rich */}

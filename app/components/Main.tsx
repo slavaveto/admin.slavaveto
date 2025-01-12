@@ -13,7 +13,6 @@ import { toast } from 'react-hot-toast';
 import {Trash, CirclePlus} from "lucide-react";
 import {Link} from "@nextui-org/link";
 
-
 interface Page {
     page_key: string;
     order?: number;
@@ -27,7 +26,7 @@ interface Translation {
     is_rich: boolean;
 }
 
-export default function MainPage() {
+export default function Main() {
 
     const [isPageContentLoading, setIsPageContentLoading] = useState(true);
     const {pages, selectedPage, isPagesLoading, handlePageSelection} = pageList();
@@ -141,7 +140,7 @@ export default function MainPage() {
 
         //setEditingRow(row);
         setIsModalOpen(true);
-        console.log('Редактирование строки:', row);
+        //console.log('Редактирование строки:', row);
     };
 
 
@@ -346,6 +345,7 @@ export default function MainPage() {
             toast.error('Неожиданная ошибка.');
         }
     };
+
 
     return (
         <div className="flex w-full flex-col">
