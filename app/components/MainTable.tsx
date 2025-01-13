@@ -1,13 +1,16 @@
 'use client';
+import { createClient } from '@/app/assets/auth/utils/supabase/client';
+
 
 import { useState, useEffect } from 'react';
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Checkbox, Spinner } from '@nextui-org/react';
 import { ScrollShadow } from '@nextui-org/react';
 import { Link } from '@nextui-org/link';
-import { Edit, Trash, ArrowUp, ArrowDown } from 'lucide-react';
+import { Edit, Trash, ArrowUp, ArrowDown, Copy } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 import { handleSaveOrder, moveRowUp, moveRowDown } from './utils/changeOrder';
+import  copyItem  from './utils/сopyItem';
 
 interface EditableTableProps {
     tableName: string; // Название текущей таблицы
@@ -36,12 +39,19 @@ export default function MainTable({ tableName, content, onEdit, onDelete, onTogg
             handleSaveOrder(updatedRows, tableName)
         );
     };
-
     const handleMoveRowDown = (index: number) => {
         moveRowDown(index, tableContent, setTableContent, (updatedRows) =>
             handleSaveOrder(updatedRows, tableName)
         );
     };
+
+    const { handleCopyRow } = copyItem({
+        tableName,
+        tableContent,
+        setTableContent,
+        handleSaveOrder,
+    });
+
 
     return (
         <Table aria-label="Table with move-up and move-down functionality" className="table-auto w-full" isStriped>
@@ -87,7 +97,7 @@ export default function MainTable({ tableName, content, onEdit, onDelete, onTogg
                             </div>
                         </TableCell>
                         <TableCell
-                            className="-w-1/6 border-r border-default-300 text-center text-danger-300 font-medium cursor-pointer p-0 px-2 m-0"
+                            className="-w-1/6 border-r border-default-300 text-center text-danger-300 font-medium cursor-pointer p-0 p-2 m-0"
                             // onClick={() => handleMoveRowUp(index)}
                         >
                             {row.item_id}
@@ -108,19 +118,28 @@ export default function MainTable({ tableName, content, onEdit, onDelete, onTogg
                             </div>
                         </TableCell>
                         <TableCell className="-w-1/12 border-l border-default-300 text-center p-0 m-0">
-                            <div className="flex justify-center items-center space-x-[10px]  p-0 px-2 m-0">
+                            <div className="flex justify-between items-center    p-0 px-2 m-0">
                                 <Link
-                                    className="mt-[-0px] cursor-pointer"
+                                    className="mt-[-0px] cursor-pointer mr-[10px]"
                                     onClick={() => onEdit(row)}
                                 >
-                                    <Edit size={18} />
+                                    <Edit size={20} />
                                 </Link>
+
                                 <Link
-                                    className="mt-[-2px] cursor-pointer "
+                                    className="mt-[-0px]  cursor-pointer mr-[8px]"
+                                    color={"success"}
+                                    onClick={() => handleCopyRow(index)}
+                                >
+                                    <Copy size={20} />
+                                </Link>
+
+                                <Link
+                                    className="mt-[0px] cursor-pointer flex justify-center p-0"
                                     color="danger"
                                     onClick={() => onDelete(row)}
                                 >
-                                    <Trash size={18} />
+                                    <Trash size={20} />
                                 </Link>
                             </div>
                         </TableCell>
