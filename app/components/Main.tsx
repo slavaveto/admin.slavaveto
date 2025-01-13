@@ -24,13 +24,14 @@ interface Translation {
     ru: string;
     uk: string;
     is_rich: boolean;
+    // order: number
 }
 
 export default function Main() {
 
     const [isPageContentLoading, setIsPageContentLoading] = useState(true);
     const {pages, selectedPage, isPagesLoading, handlePageSelection} = pageList();
-    const [content, setContent] = useState<{ ru: string; uk: string; item_id: string ; is_rich: boolean }[] | null>(null);
+    const [content, setContent] = useState<{ ru: string; uk: string; item_id: string ; is_rich: boolean;   }[] | null>(null);
 
     const [isSaving, setIsSaving] = useState(false); // Состояние загрузки сохранения
 
@@ -115,14 +116,16 @@ export default function Main() {
             const supabase = createClient();
             const {data, error} = await supabase
                 .from(selectedPage)
-                .select('item_id, ru, uk, is_rich')
-                .order('item_id', { ascending: false });
+                .select('item_id, ru, uk, is_rich, order')
+                // .order('item_id', { ascending: false });
+                .order("order", { ascending: true });
 
             if (error) {
                 //console.error(`Failed to fetch content for ${pageKey}:`, error.message);
                 setContent([]);
             } else {
                 setContent(data || []);
+
             }
 
             const elapsedTime = Date.now() - startTime;
@@ -347,6 +350,8 @@ export default function Main() {
     };
 
 
+
+    // @ts-ignore
     return (
         <div className="flex w-full flex-col">
 
@@ -375,7 +380,7 @@ export default function Main() {
             <div className="flex w-full">
 
 
-                <div className="min-w-[200px]">
+                <div className="min-w-[150px]">
 
                     {isPagesLoading ? (
                         <SkeletonList/>
@@ -393,9 +398,14 @@ export default function Main() {
                         <SkeletonPageContent/>
                     ) : (
                         <>
+
                             {content && content.length > 0 ? (
-                                <MainTable content={content} onEdit={handleEditClick} onDelete={handleDeleteClick}
-                                           onToggleRich={handleToggleRich}/>
+                                <MainTable
+                                    tableName={selectedPage ?? ''}
+                                    content={content}
+                                    onEdit={handleEditClick}
+                                    onDelete={handleDeleteClick}
+                                    onToggleRich={handleToggleRich}/>
                             ) : (
                                 <p>Нет данных для отображения</p>
                             )}
