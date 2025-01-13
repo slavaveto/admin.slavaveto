@@ -57,6 +57,8 @@ export default function ModalEdit({ isOpen, onClose, onSave, onCreate, isSaving,
         }
     }, [isOpen]);
 
+
+
     const handleSync = async () => {
         if (!ru.trim()) {
             toast.error('Введите текст для перевода.');
@@ -94,6 +96,7 @@ export default function ModalEdit({ isOpen, onClose, onSave, onCreate, isSaving,
             onSave(itemId, ru, uk);
         }
     };
+
 
     return (
         <Modal

@@ -7,6 +7,8 @@ import { useState } from 'react';
 import { ScrollShadow } from '@nextui-org/react';
 import { createClient } from '@/app/assets/auth/utils/supabase/client';
 
+import { handleSaveOrder, moveRowUp } from './utils/changeOrder';
+
 interface EditableTableProps {
     tableName: string; // Название текущей таблицы
     content: { ru: string; uk: string; item_id: string; is_rich: boolean; order: number }[];
@@ -25,51 +27,10 @@ export default function MainTable({ tableName, content, onEdit, onDelete, onTogg
     );
 
 
-    const handleSaveOrder = async (updatedRows: { item_id: string; order: number }[]) => {
-
-        console.log("Rows to update:", updatedRows);
-        const supabase = createClient();
-
-        try {
-            const updatePromises = updatedRows.map(({ item_id, order }) =>
-                supabase
-                    .from(tableName) // Укажите имя вашей таблицы
-                    .update({ order }) // Обновляем поле order
-                    .eq("item_id", item_id) // Фильтруем по item_id
-            );
-
-            const results = await Promise.all(updatePromises);
-
-            const hasErrors = results.some(({ error }) => error);
-            if (hasErrors) {
-                console.error("Some updates failed:", results);
-                throw new Error("Failed to update some rows");
-            }
-
-            console.log("Order updated successfully");
-        } catch (error) {
-            console.error("Failed to save order:", error);
-        }
-    };
-
-    const moveRowUp = (index: number) => {
-        if (index === 0) return; // Нельзя поднять первый элемент выше
-
-        const updatedContent = [...tableContent];
-        // Меняем местами строки
-        [updatedContent[index - 1], updatedContent[index]] = [updatedContent[index], updatedContent[index - 1]];
-
-        // Обновляем порядок в `order`
-        updatedContent.forEach((row, i) => (row.order = i + 1));
-        setTableContent(updatedContent);
-
-        // Создаём массив для сохранения
-        const updatedOrder = updatedContent.map((row) => ({
-            item_id: row.item_id, // Используем `item_id`
-            order: row.order,
-        }));
-
-        handleSaveOrder(updatedOrder); // Сохраняем порядок
+    const handleMoveRowUp = (index: number) => {
+        moveRowUp(index, tableContent, setTableContent, (updatedRows) =>
+            handleSaveOrder(updatedRows, tableName)
+        );
     };
 
     return (
@@ -86,7 +47,7 @@ export default function MainTable({ tableName, content, onEdit, onDelete, onTogg
                     <TableRow key={row.item_id}>
                         <TableCell
                             className="w-1/6 border-r border-default-300 text-center cursor-pointer hover:text-primary"
-                            onClick={() => moveRowUp(index)}
+                            onClick={() => handleMoveRowUp(index)}
                         >
                             {row.item_id}
                         </TableCell>
