@@ -172,15 +172,26 @@ export default function Main() {
 
                     // Если item_id изменился, заменяем запись полностью
                     if (editingRow.item_id !== item_id) {
+                        // Добавляем новое поле `order`, определяем его значение
+                        const newItem: Translation = {
+                            item_id,
+                            ru,
+                            uk,
+                            is_rich: editingRow.is_rich || false,
+                            order: prevContent.length + 1, // Устанавливаем `order` для нового элемента
+                        };
+
                         return [
-                            { item_id, ru, uk, is_rich: editingRow.is_rich || false },
-                            ...prevContent.filter((row) => row.item_id !== editingRow.item_id),
+                            newItem, // Новый объект
+                            ...prevContent.filter((row) => row.item_id !== editingRow.item_id), // Сохраняем остальные записи
                         ];
                     }
 
                     // Обновляем только существующую запись
                     return prevContent.map((row) =>
-                        row.item_id === editingRow.item_id ? { ...row, ru, uk } : row
+                        row.item_id === editingRow.item_id
+                            ? { ...row, ru, uk } // Обновляем ru и uk, оставляем остальные поля
+                            : row
                     );
                 });
 

@@ -15,89 +15,20 @@ import {Link} from "@nextui-org/link";
 
 import { useDeleteHandler } from './utils/deleteItem';
 
-// interface Page {
-//     page_key: string;
-//     order?: number;
-//     btn_type?: string;
-// }
-
 interface Translation {
-    item_id: string;
-    ru: string;
-    uk: string;
-    is_rich: boolean;
+    item_id: string; ru: string; uk: string; is_rich: boolean; order: number
 }
 
 export default function Main() {
 
     const [isPageContentLoading, setIsPageContentLoading] = useState(true);
     const {pages, selectedPage, isPagesLoading, handlePageSelection} = pageList();
-    const [content, setContent] = useState<{ ru: string; uk: string; item_id: string ; is_rich: boolean  }[] | null>(null);
-
+    const [content, setContent] = useState<Translation[] | null>(null);
     const [isSaving, setIsSaving] = useState(false); // Состояние загрузки сохранения
 
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false);
-    const [deletingRow, setDeletingRow] = useState<{
-        item_id: string;
-        ru: string;
-        uk: string;
-    } | null>(null);
-
-
-
-// Обработчик удаления
-    const handleDeleteClick = (row: { item_id: string; ru: string; uk: string }) => {
-        setDeletingRow(row);
-        setIsDeleteModalOpen(true); // Открываем модальное окно
-    };
-
-    const handleConfirmDelete = async () => {
-        if (!deletingRow?.item_id || !selectedPage) return;
-
-        setIsDeleting(true); // Устанавливаем состояние загрузки
-        const startTime = Date.now(); // Засекаем время начала удаления
-
-        try {
-            const supabase = createClient();
-
-            const { error } = await supabase
-                .from(selectedPage)
-                .delete()
-                .eq('item_id', deletingRow.item_id);
-
-            if (error) {
-                console.error('Error deleting data:', error.message);
-                toast.error('Ошибка при удалении записи.');
-            } else {
-
-
-                const elapsedTime = Date.now() - startTime;
-                const delay = Math.max(1000 - elapsedTime, 0); // Минимальная задержка в 1 сек
-
-                if (delay > 0) {
-                    await new Promise((resolve) => setTimeout(resolve, delay));
-                }
-            }
-        } catch (err) {
-            console.error('Unexpected error:', err);
-            toast.error('Неожиданная ошибка при удалении.');
-        } finally {
-            setIsDeleting(false); // Сбрасываем состояние загрузки
-            setIsDeleteModalOpen(false); // Закрываем модальное окно
-
-            setTimeout(() => {
-                toast.success('Запись успешно удалена.');
-                // Обновление состояния таблицы
-                setContent((prevContent) =>
-                    prevContent ? prevContent.filter((row) => row.item_id !== deletingRow.item_id) : []
-                );
-            }, 500); // Задержка перед появлением тоста
-        }
-    };
-
-
-
+    const {isDeleteModalOpen, setIsDeleteModalOpen, isDeleting, deletingRow, handleDeleteClick, handleConfirmDelete,
+    } = useDeleteHandler({selectedPage, setContent,
+    });
 
 
 
@@ -108,7 +39,7 @@ export default function Main() {
         item_id: string;
         page: string | null; // Добавляем поле для страницы
         is_rich?: boolean;
-        // order?: number;
+        order?: number; // Добавляем поле `order`
     } | null>(null);
 
     useEffect(() => {
@@ -120,7 +51,7 @@ export default function Main() {
             const supabase = createClient();
             const {data, error} = await supabase
                 .from(selectedPage)
-                .select('item_id, ru, uk, is_rich')
+                .select('item_id, ru, uk, is_rich, order')
                 // .order('item_id', { ascending: false });
                 .order("order", { ascending: true });
 
@@ -128,7 +59,12 @@ export default function Main() {
                 //console.error(`Failed to fetch content for ${pageKey}:`, error.message);
                 setContent([]);
             } else {
-                setContent(data || []);
+                setContent(
+                    data?.map((item) => ({
+                        ...item,
+                        order: item.order ?? 0, // Добавляем значение по умолчанию для `order`, если его нет
+                    })) || []
+                );
 
             }
 
@@ -236,15 +172,26 @@ export default function Main() {
 
                     // Если item_id изменился, заменяем запись полностью
                     if (editingRow.item_id !== item_id) {
+                        // Добавляем новое поле `order`, определяем его значение
+                        const newItem: Translation = {
+                            item_id,
+                            ru,
+                            uk,
+                            is_rich: editingRow.is_rich || false,
+                            order: prevContent.length + 1, // Устанавливаем `order` для нового элемента
+                        };
+
                         return [
-                            { item_id, ru, uk, is_rich: editingRow.is_rich || false },
-                            ...prevContent.filter((row) => row.item_id !== editingRow.item_id),
+                            newItem, // Новый объект
+                            ...prevContent.filter((row) => row.item_id !== editingRow.item_id), // Сохраняем остальные записи
                         ];
                     }
 
                     // Обновляем только существующую запись
                     return prevContent.map((row) =>
-                        row.item_id === editingRow.item_id ? { ...row, ru, uk } : row
+                        row.item_id === editingRow.item_id
+                            ? { ...row, ru, uk } // Обновляем ru и uk, оставляем остальные поля
+                            : row
                     );
                 });
 
@@ -269,10 +216,27 @@ export default function Main() {
         try {
             const supabase = createClient();
 
+            // Определяем текущий максимальный `order`
+            const { data: maxOrderData, error: maxOrderError } = await supabase
+                .from(selectedPage)
+                .select('order')
+                .order('order', { ascending: false })
+                .limit(1);
+
+            if (maxOrderError) {
+                console.error('Error fetching max order:', maxOrderError.message);
+                toast.error('Ошибка при получении максимального порядка.');
+                setIsSaving(false);
+                return;
+            }
+
+            const maxOrder = maxOrderData?.[0]?.order || 0; // Максимальное значение `order`, по умолчанию 0
+            const newOrder = maxOrder + 1; // Новый порядок для записи
+
             const { data, error } = await supabase
                 .from(selectedPage)
                 //.insert([{ item_id, ru, uk }]) // Вставляем новую запись
-                .insert([{ item_id: item_id, ru: ru, uk: uk }])
+                .insert([{ item_id: item_id, ru: ru, uk: uk , order: newOrder }])
                 .select('*'); // Убедимся, что возвращаются вставленные данные
             console.log('Inserting data:', { item_id, ru, uk });
 
@@ -302,9 +266,9 @@ export default function Main() {
                 // Обновляем состояние таблицы перед показом тоста
                 if (createdData) {
                     setContent((prevContent) => {
-                        const updatedContent = [...(createdData || []), ...(prevContent || [])];
+                        const updatedContent = [...(prevContent || []), ...(createdData || [])];
                         console.log('Updated content:', updatedContent); // Для отладки
-                        return updatedContent;
+                        return updatedContent.sort((a, b) => a.order - b.order); // Убедимся, что сортировка по `order` сохраняется
                     });
                 }
                 toast.success('Данные успешно созданы');
