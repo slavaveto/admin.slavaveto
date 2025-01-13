@@ -103,6 +103,9 @@ export default function Main() {
         try {
             const supabase = createClient();
 
+            // Сохраняем текущее значение order (ДОБАВЛЕНО)
+            const currentOrder = editingRow.order ?? 0;
+
             // Если item_id изменился, удаляем старую запись и создаем новую
             if (editingRow.item_id !== item_id) {
                 // Удаляем старую запись
@@ -118,10 +121,10 @@ export default function Main() {
                     return;
                 }
 
-                // Создаем новую запись
+                // Создаем новую запись с сохранением order (ИЗМЕНЕНО)
                 const { data: newData, error: createError } = await supabase
                     .from(editingRow.page)
-                    .insert([{ item_id, ru, uk }])
+                    .insert([{ item_id, ru, uk, is_rich: editingRow.is_rich || false, order: currentOrder }]) // Добавлено сохранение order
                     .select('*');
 
                 if (createError) {
@@ -136,7 +139,7 @@ export default function Main() {
                 // Обновляем существующую запись
                 const { error: updateError } = await supabase
                     .from(editingRow.page)
-                    .update({ ru, uk })
+                    .update({ ru, uk }) // Обновляются только ru и uk
                     .eq('item_id', editingRow.item_id);
 
                 if (updateError) {
@@ -154,9 +157,6 @@ export default function Main() {
             if (delay > 0) {
                 await new Promise((resolve) => setTimeout(resolve, delay));
             }
-
-
-
         } catch (err) {
             console.error('Unexpected error:', err);
             toast.error('Неожиданная ошибка при сохранении.');
@@ -166,24 +166,26 @@ export default function Main() {
 
             setTimeout(() => {
                 toast.success('Данные успешно обновлены');
+                const currentOrder = editingRow.order ?? 0;
+
                 // Обновляем состояние таблицы
                 setContent((prevContent) => {
                     if (!prevContent) return prevContent;
 
                     // Если item_id изменился, заменяем запись полностью
                     if (editingRow.item_id !== item_id) {
-                        // Добавляем новое поле `order`, определяем его значение
+                        // Создаем новый объект с сохраненным order (ИЗМЕНЕНО)
                         const newItem: Translation = {
                             item_id,
                             ru,
                             uk,
                             is_rich: editingRow.is_rich || false,
-                            order: prevContent.length + 1, // Устанавливаем `order` для нового элемента
+                            order: currentOrder, // Используем сохраненное значение order
                         };
 
                         return [
                             newItem, // Новый объект
-                            ...prevContent.filter((row) => row.item_id !== editingRow.item_id), // Сохраняем остальные записи
+                            ...prevContent.filter((row) => row.item_id !== editingRow.item_id), // Удаляем старую запись
                         ];
                     }
 
@@ -194,11 +196,9 @@ export default function Main() {
                             : row
                     );
                 });
-
             }, 500); // Задержка перед появлением тоста
         }
     };
-
 
     const handleCreate = async (item_id: string, ru: string, uk: string) => {
         setIsSaving(true); // Устанавливаем состояние загрузки
