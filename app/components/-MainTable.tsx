@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Checkbox, Spinner } from '@nextui-org/react';
 import { ScrollShadow } from '@nextui-org/react';
 import { Link } from '@nextui-org/link';
-import { Edit, Trash, ArrowUp, ArrowDown } from 'lucide-react';
+import { Edit, Trash, ArrowUp } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
-import { handleSaveOrder, moveRowUp, moveRowDown } from './utils/changeOrder';
+import { handleSaveOrder, moveRowUp } from './utils/changeOrder';
 
 interface EditableTableProps {
     tableName: string; // Название текущей таблицы
@@ -37,14 +37,8 @@ export default function MainTable({ tableName, content, onEdit, onDelete, onTogg
         );
     };
 
-    const handleMoveRowDown = (index: number) => {
-        moveRowDown(index, tableContent, setTableContent, (updatedRows) =>
-            handleSaveOrder(updatedRows, tableName)
-        );
-    };
-
     return (
-        <Table aria-label="Table with move-up and move-down functionality" className="table-auto w-full" isStriped>
+        <Table aria-label="Table with move-up functionality" className="table-auto w-full" isStriped>
             <TableHeader className="p-0 m-0">
                 <TableColumn className="w-1/12 border-r border-default-300 text-center">Order</TableColumn>
                 <TableColumn className="w-1/6 border-r border-default-300 text-center">ID</TableColumn>
@@ -56,28 +50,17 @@ export default function MainTable({ tableName, content, onEdit, onDelete, onTogg
             <TableBody>
                 {tableContent.map((row, index) => (
                     <TableRow key={row.item_id}>
-                        {/* Колонка со стрелками */}
+                        {/* Колонка со стрелкой вверх */}
                         <TableCell className="w-1/12 border-r border-default-300 text-center">
-                            <div className="flex flex-row --space-y-2 ">
-                                <Link
-                                    className={`cursor-pointer ${index === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                    onClick={() => {
-                                        if (index !== 0) handleMoveRowUp(index);
-                                    }}
-                                    aria-disabled={index === 0}
-                                >
-                                    <ArrowUp size={18} />
-                                </Link>
-                                <Link
-                                    className={`cursor-pointer ${index === tableContent.length - 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                    onClick={() => {
-                                        if (index !== tableContent.length - 1) handleMoveRowDown(index);
-                                    }}
-                                    aria-disabled={index === tableContent.length - 1}
-                                >
-                                    <ArrowDown size={18} />
-                                </Link>
-                            </div>
+                            <Link
+                                className={`cursor-pointer ${index === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                onClick={() => {
+                                    if (index !== 0) handleMoveRowUp(index);
+                                }}
+                                aria-disabled={index === 0}
+                            >
+                                <ArrowUp size={18} />
+                            </Link>
                         </TableCell>
                         <TableCell
                             className="w-1/6 border-r border-default-300 text-center cursor-pointer hover:text-primary"
@@ -107,7 +90,7 @@ export default function MainTable({ tableName, content, onEdit, onDelete, onTogg
                                     <Edit size={18} />
                                 </Link>
                                 <Link
-                                    className="mt-[-2px] cursor-pointer "
+                                    className="mt-[-2px] cursor-pointer"
                                     color="danger"
                                     onClick={() => onDelete(row)}
                                 >
