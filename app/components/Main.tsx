@@ -24,14 +24,13 @@ interface Translation {
     ru: string;
     uk: string;
     is_rich: boolean;
-    // order: number
 }
 
 export default function Main() {
 
     const [isPageContentLoading, setIsPageContentLoading] = useState(true);
     const {pages, selectedPage, isPagesLoading, handlePageSelection} = pageList();
-    const [content, setContent] = useState<{ ru: string; uk: string; item_id: string ; is_rich: boolean;  order: number }[] | null>(null);
+    const [content, setContent] = useState<{ ru: string; uk: string; item_id: string ; is_rich: boolean  }[] | null>(null);
 
     const [isSaving, setIsSaving] = useState(false); // Состояние загрузки сохранения
 
@@ -44,7 +43,7 @@ export default function Main() {
     } | null>(null);
 
 // Обработчик удаления
-    const handleDeleteClick = (row: { item_id: string; ru: string; uk: string; order: number }) => {
+    const handleDeleteClick = (row: { item_id: string; ru: string; uk: string }) => {
         setDeletingRow(row);
         setIsDeleteModalOpen(true); // Открываем модальное окно
     };
@@ -105,7 +104,7 @@ export default function Main() {
         item_id: string;
         page: string | null; // Добавляем поле для страницы
         is_rich?: boolean;
-        order?: number;
+        // order?: number;
     } | null>(null);
 
     useEffect(() => {
@@ -117,7 +116,7 @@ export default function Main() {
             const supabase = createClient();
             const {data, error} = await supabase
                 .from(selectedPage)
-                .select('item_id, ru, uk, is_rich, order')
+                .select('item_id, ru, uk, is_rich')
                 // .order('item_id', { ascending: false });
                 .order("order", { ascending: true });
 
@@ -150,7 +149,7 @@ export default function Main() {
 
 
 
-    const handleSave = async (item_id: string, ru: string, uk: string, order: number) => {
+    const handleSave = async (item_id: string, ru: string, uk: string) => {
         setIsSaving(true); // Устанавливаем состояние загрузки
 
         if (!editingRow?.item_id || !editingRow?.page) {
@@ -250,7 +249,7 @@ export default function Main() {
     };
 
 
-    const handleCreate = async (item_id: string, ru: string, uk: string,  order: number) => {
+    const handleCreate = async (item_id: string, ru: string, uk: string) => {
         setIsSaving(true); // Устанавливаем состояние загрузки
 
         if (!item_id || !selectedPage) {
@@ -424,7 +423,7 @@ export default function Main() {
                         item_id: editingRow?.item_id || '',
                         page: editingRow?.page || null,
                         is_rich: editingRow?.is_rich ?? false,
-                        order: editingRow?.order || 0,// Устанавливаем значение по умолчанию для is_rich
+                        // order: editingRow?.order || 0,// Устанавливаем значение по умолчанию для is_rich
                     }}
                     isSaving={isSaving}
                     mode={editingRow?.item_id ? 'edit' : 'create'}

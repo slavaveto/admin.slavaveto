@@ -11,10 +11,10 @@ import { toast } from 'react-hot-toast';
 interface EditModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (ru: string, uk: string, item_id: string, order: number) => void;
-    onCreate: (ru: string, uk: string, item_id: string, order: number) => void;
+    onSave: (ru: string, uk: string, item_id: string) => void;
+    onCreate: (ru: string, uk: string, item_id: string) => void;
     isSaving: boolean;
-    initialValues: { ru: string; uk: string; item_id: string; is_rich: boolean; page: string; order: number | null; };
+    initialValues: { ru: string; uk: string; item_id: string; is_rich: boolean; page: string | null; };
     mode: 'edit' | 'create';
 }
 
