@@ -63,9 +63,9 @@ export default function MainTable({ content, onEdit, onDelete, onToggleRich }: E
 
                         {/* Правая колонка (UK) */}
                         <TableCell className="w-1/3">
-                                <ScrollShadow className="rich-text flex items-start">
-                                    <HtmlString text= {row.uk}/>
-                                </ScrollShadow>
+                            <ScrollShadow className="rich-text flex items-start">
+                                <HtmlString text= {row.uk}/>
+                            </ScrollShadow>
                         </TableCell>
 
                         {/* Колонка is_rich */}
@@ -99,7 +99,7 @@ export default function MainTable({ content, onEdit, onDelete, onToggleRich }: E
                             </div>
                         </TableCell>
                     </TableRow>
-                    ))}
+                ))}
             </TableBody>
         </Table>
     );

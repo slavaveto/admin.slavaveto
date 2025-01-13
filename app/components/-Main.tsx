@@ -13,11 +13,13 @@ import { toast } from 'react-hot-toast';
 import {Trash, CirclePlus} from "lucide-react";
 import {Link} from "@nextui-org/link";
 
-interface Page {
-    page_key: string;
-    order?: number;
-    btn_type?: string;
-}
+import { useDeleteHandler } from './utils/deleteItem';
+
+// interface Page {
+//     page_key: string;
+//     order?: number;
+//     btn_type?: string;
+// }
 
 interface Translation {
     item_id: string;
@@ -30,7 +32,7 @@ export default function Main() {
 
     const [isPageContentLoading, setIsPageContentLoading] = useState(true);
     const {pages, selectedPage, isPagesLoading, handlePageSelection} = pageList();
-    const [content, setContent] = useState<{ ru: string; uk: string; item_id: string ; is_rich: boolean }[] | null>(null);
+    const [content, setContent] = useState<{ ru: string; uk: string; item_id: string ; is_rich: boolean  }[] | null>(null);
 
     const [isSaving, setIsSaving] = useState(false); // Состояние загрузки сохранения
 
@@ -41,6 +43,8 @@ export default function Main() {
         ru: string;
         uk: string;
     } | null>(null);
+
+
 
 // Обработчик удаления
     const handleDeleteClick = (row: { item_id: string; ru: string; uk: string }) => {
@@ -104,6 +108,7 @@ export default function Main() {
         item_id: string;
         page: string | null; // Добавляем поле для страницы
         is_rich?: boolean;
+        // order?: number;
     } | null>(null);
 
     useEffect(() => {
@@ -116,13 +121,15 @@ export default function Main() {
             const {data, error} = await supabase
                 .from(selectedPage)
                 .select('item_id, ru, uk, is_rich')
-                .order('item_id', { ascending: false });
+                // .order('item_id', { ascending: false });
+                .order("order", { ascending: true });
 
             if (error) {
                 //console.error(`Failed to fetch content for ${pageKey}:`, error.message);
                 setContent([]);
             } else {
                 setContent(data || []);
+
             }
 
             const elapsedTime = Date.now() - startTime;
@@ -347,6 +354,8 @@ export default function Main() {
     };
 
 
+
+    // @ts-ignore
     return (
         <div className="flex w-full flex-col">
 
@@ -375,7 +384,7 @@ export default function Main() {
             <div className="flex w-full">
 
 
-                <div className="min-w-[200px]">
+                <div className="min-w-[150px]">
 
                     {isPagesLoading ? (
                         <SkeletonList/>
@@ -393,9 +402,14 @@ export default function Main() {
                         <SkeletonPageContent/>
                     ) : (
                         <>
+
                             {content && content.length > 0 ? (
-                                <MainTable content={content} onEdit={handleEditClick} onDelete={handleDeleteClick}
-                                           onToggleRich={handleToggleRich}/>
+                                <MainTable
+                                    tableName={selectedPage ?? ''}
+                                    content={content}
+                                    onEdit={handleEditClick}
+                                    onDelete={handleDeleteClick}
+                                    onToggleRich={handleToggleRich}/>
                             ) : (
                                 <p>Нет данных для отображения</p>
                             )}
@@ -412,7 +426,8 @@ export default function Main() {
                         uk: editingRow?.uk || '',
                         item_id: editingRow?.item_id || '',
                         page: editingRow?.page || null,
-                        is_rich: editingRow?.is_rich ?? false, // Устанавливаем значение по умолчанию для is_rich
+                        is_rich: editingRow?.is_rich ?? false,
+                        // order: editingRow?.order || 0,// Устанавливаем значение по умолчанию для is_rich
                     }}
                     isSaving={isSaving}
                     mode={editingRow?.item_id ? 'edit' : 'create'}

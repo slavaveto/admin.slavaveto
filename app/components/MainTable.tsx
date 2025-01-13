@@ -1,11 +1,10 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Checkbox } from '@nextui-org/react';
+import { ScrollShadow } from '@nextui-org/react';
 import { Link } from '@nextui-org/link';
 import { Edit, Trash } from 'lucide-react';
-import { useState } from 'react';
-import { ScrollShadow } from '@nextui-org/react';
-import { createClient } from '@/app/assets/auth/utils/supabase/client';
 
 import { handleSaveOrder, moveRowUp } from './utils/changeOrder';
 
@@ -14,7 +13,7 @@ interface EditableTableProps {
     content: { ru: string; uk: string; item_id: string; is_rich: boolean; order: number }[];
     onEdit: (row: { ru: string; uk: string; item_id: string; is_rich: boolean; order: number }) => void;
     onDelete: (row: { ru: string; uk: string; item_id: string; is_rich: boolean; order: number }) => void;
-    onToggleRich: (row: { ru: string; uk: string; item_id: string; is_rich: boolean }) => void;
+    onToggleRich: (row: { ru: string; uk: string; item_id: string; is_rich: boolean; order: number }) => void;
 }
 
 export default function MainTable({ tableName, content, onEdit, onDelete, onToggleRich }: EditableTableProps) {
@@ -22,10 +21,14 @@ export default function MainTable({ tableName, content, onEdit, onDelete, onTogg
         content.sort((a, b) => a.order - b.order) // Сортируем по полю `order` при инициализации
     );
 
+    // Синхронизация `tableContent` с `content`, если `content` изменилось
+    useEffect(() => {
+        setTableContent(content.sort((a, b) => a.order - b.order));
+    }, [content]);
+
     const HtmlString = ({ text }: { text: string }) => (
         <span dangerouslySetInnerHTML={{ __html: text }} />
     );
-
 
     const handleMoveRowUp = (index: number) => {
         moveRowUp(index, tableContent, setTableContent, (updatedRows) =>
@@ -66,10 +69,14 @@ export default function MainTable({ tableName, content, onEdit, onDelete, onTogg
                         </TableCell>
                         <TableCell className="w-1/12 border-l border-default-300 text-center">
                             <div className="flex justify-center items-center space-x-[12px]">
-                                <Link onClick={() => onEdit(row)}>
+                                <Link
+                                    className="mt-[-0px] cursor-pointer"
+                                    onClick={() => onEdit(row)}>
                                     <Edit size={18} />
                                 </Link>
-                                <Link color="danger" onClick={() => onDelete(row)}>
+                                <Link
+                                    className="mt-[-2px] cursor-pointer "
+                                    color="danger" onClick={() => onDelete(row)}>
                                     <Trash size={18} />
                                 </Link>
                             </div>

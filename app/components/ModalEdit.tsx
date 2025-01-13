@@ -134,17 +134,17 @@ export default function ModalEdit({ isOpen, onClose, onSave, onCreate, isSaving,
                         {viewMode === 'both' && (
                             <div className="mb-4">
                                 <Input
-                                    labelPlacement="outside"
+                                    // labelPlacement="outside"
                                     style={{ fontWeight: 'bold' }}
                                     classNames={{
-                                        label: 'ml-[8px]',
+                                        // label: 'ml-[8px]',
                                     }}
-                                    placeholder=" "
+                                    // placeholder=" "
                                     isRequired
                                     variant="bordered"
                                     color="primary"
                                     type="text"
-                                    label="ItemId"
+                                    label="ITEM ID"
                                     value={itemId}
                                     onChange={(e) => {
                                         const newValue = e.target.value;
