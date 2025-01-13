@@ -11,10 +11,10 @@ import { toast } from 'react-hot-toast';
 interface EditModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (ru: string, uk: string, item_id: string, order: number) => void;
-    onCreate: (ru: string, uk: string, item_id: string, order: number) => void;
+    onSave: (ru: string, uk: string, item_id: string) => void;
+    onCreate: (ru: string, uk: string, item_id: string) => void;
     isSaving: boolean;
-    initialValues: { ru: string; uk: string; item_id: string; is_rich: boolean; page: string; order: number | null; };
+    initialValues: { ru: string; uk: string; item_id: string; is_rich: boolean; page: string | null; };
     mode: 'edit' | 'create';
 }
 
@@ -144,9 +144,10 @@ export default function ModalEdit({ isOpen, onClose, onSave, onCreate, isSaving,
                                     label="ItemId"
                                     value={itemId}
                                     onChange={(e) => {
+                                        setItemId(e.target.value); // Обновляем значение
                                         const newValue = e.target.value;
-                                        setItemId(newValue); // Обновляем только itemId
-                                        checkIfDirty(ru, uk, newValue); // Проверяем, изменилось ли что-то
+                                        setItemId(newValue);
+                                        checkIfDirty(ru, uk, newValue);        // Проверяем, изменилось ли что-то
                                     }}
                                 />
                             </div>
@@ -183,9 +184,10 @@ export default function ModalEdit({ isOpen, onClose, onSave, onCreate, isSaving,
                                         label="RU"
                                         value={ru}
                                         onChange={(e) => {
+                                            setRu(e.target.value); // Обновляем значение
                                             const newValue = e.target.value;
-                                            setRu(newValue); // Обновляем только ru
-                                            checkIfDirty(newValue, uk, itemId); // Проверяем, изменилось ли что-то
+                                            setItemId(newValue);
+                                            checkIfDirty(ru, uk, newValue);       // Проверяем, изменилось ли что-то
                                         }}
                                     />
                                 </div>
@@ -197,9 +199,10 @@ export default function ModalEdit({ isOpen, onClose, onSave, onCreate, isSaving,
                                         label="UA"
                                         value={uk}
                                         onChange={(e) => {
+                                            setUk(e.target.value); // Обновляем значение
                                             const newValue = e.target.value;
-                                            setUk(newValue); // Обновляем только uk
-                                            checkIfDirty(ru, newValue, itemId); // Проверяем, изменилось ли что-то
+                                            setItemId(newValue);
+                                            checkIfDirty(ru, uk, newValue);    // Проверяем, изменилось ли что-то
                                         }}
                                     />
                                 </div>

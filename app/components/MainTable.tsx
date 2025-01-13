@@ -10,8 +10,8 @@ import { createClient } from '@/app/assets/auth/utils/supabase/client';
 interface EditableTableProps {
     tableName: string; // Название текущей таблицы
     content: { ru: string; uk: string; item_id: string; is_rich: boolean; order: number }[];
-    onEdit: (row: { ru: string; uk: string; item_id: string; is_rich: boolean }) => void;
-    onDelete: (row: { ru: string; uk: string; item_id: string; is_rich: boolean }) => void;
+    onEdit: (row: { ru: string; uk: string; item_id: string; is_rich: boolean; order: number }) => void;
+    onDelete: (row: { ru: string; uk: string; item_id: string; is_rich: boolean; order: number }) => void;
     onToggleRich: (row: { ru: string; uk: string; item_id: string; is_rich: boolean }) => void;
 }
 
