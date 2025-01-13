@@ -59,32 +59,3 @@ export const moveRowUp = (
 
     handleSaveOrder(updatedOrder); // Сохраняем порядок
 };
-
-export const moveRowDown = (
-    index: number,
-    tableContent: { ru: string; uk: string; item_id: string; is_rich: boolean; order: number }[],
-    setTableContent: React.Dispatch<
-        React.SetStateAction<
-            { ru: string; uk: string; item_id: string; is_rich: boolean; order: number }[]
-        >
-    >,
-    handleSaveOrder: (updatedRows: { item_id: string; order: number }[]) => void
-): void => {
-    if (index === tableContent.length - 1) return; // Нельзя опустить последний элемент ниже
-
-    const updatedContent = [...tableContent];
-    // Меняем местами строки
-    [updatedContent[index + 1], updatedContent[index]] = [updatedContent[index], updatedContent[index + 1]];
-
-    // Обновляем порядок в `order`
-    updatedContent.forEach((row, i) => (row.order = i + 1));
-    setTableContent(updatedContent);
-
-    // Создаём массив для сохранения
-    const updatedOrder = updatedContent.map((row) => ({
-        item_id: row.item_id, // Используем `item_id`
-        order: row.order,
-    }));
-
-    handleSaveOrder(updatedOrder); // Сохраняем порядок
-};

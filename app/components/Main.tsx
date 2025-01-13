@@ -332,13 +332,13 @@ export default function Main() {
 
             <Link
                 color="success"
-                className="cursor-pointer "
+                className="cursor-pointer mr-2"
                 onPress={() => {
                     setEditingRow({ru: '', uk: '', item_id: '', page: selectedPage}); // Передаём пустую запись с текущей страницей
                     setIsModalOpen(true); // Открываем модальное окно
                 }}
             >
-                <CirclePlus className="inline h-6 w-6"/>
+                <CirclePlus size={27}/>
             </Link>
 
             </div>

@@ -17,7 +17,7 @@ export default async function Home() {
         }
 
         return (
-            <main className="flex flex-grow container mx-auto px-3 max-w-screen-lg">
+            <main className="flex flex-grow container mx-auto px-3 xl:max-w-screen-xl">
 
                     <Main />
 

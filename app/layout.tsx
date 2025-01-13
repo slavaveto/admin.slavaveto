@@ -53,7 +53,7 @@ export default function RootLayout({
                 style={{position: 'sticky', top: 0, zIndex: 50,}}
         >
 
-          <div className="container flex mx-auto px-3 justify-end max-w-screen-lg">
+          <div className="container flex mx-auto px-3 justify-end xl:max-w-screen-xl">
 
             {!hasEnvVars ? <EnvVarWarning/> : <HeaderAuth/>}
           </div>
@@ -62,7 +62,7 @@ export default function RootLayout({
         {children}
 
         <footer className="footer_bg flex h-[50px] items-center ">
-          <div className="container flex mx-auto px-3 -justify-between justify-end items-center max-w-screen-lg">
+          <div className="container flex mx-auto px-3 -justify-between justify-end items-center xl:max-w-screen-xl">
             <ThemeToggle/>
           </div>
         </footer>
