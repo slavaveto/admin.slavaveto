@@ -40,11 +40,15 @@ const copyItem = ({
 
         const newItemId = generateUniqueItemId(copiedRow.item_id);
 
+        // Создаем новую строку с очищенными полями `ru` и `uk`
         const newRow = {
             ...copiedRow,
             item_id: newItemId,
+            ru: '', // Очищаем поле `ru`
+            uk: '', // Очищаем поле `uk`
             order: newOrder,
         };
+
 
         // Добавляем новую запись в таблицу и обновляем `order` последующих строк
         const updatedContent = [
@@ -70,7 +74,7 @@ const copyItem = ({
             // Вставляем новую запись
             const { error } = await supabase
                 .from(tableName)
-                .insert([{ item_id: newItemId, ru: copiedRow.ru, uk: copiedRow.uk, is_rich: copiedRow.is_rich, order: newOrder }]);
+                .insert([{ item_id: newItemId, ru: "", uk: "", is_rich: copiedRow.is_rich, order: newOrder }]);
 
             if (error) {
                 console.error('Ошибка при добавлении новой записи:', error.message);

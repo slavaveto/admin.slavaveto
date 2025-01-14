@@ -97,7 +97,7 @@ export default function MainTable({ tableName, content, onEdit, onDelete, onTogg
                             </div>
                         </TableCell>
                         <TableCell
-                            className="-w-1/6 border-r border-default-300 text-center text-danger-300 font-medium cursor-pointer p-0 p-2 m-0"
+                            className="-w-1/6 border-r border-default-300 text-center text-danger-300 font-medium  p-0 p-2 m-0"
                             // onClick={() => handleMoveRowUp(index)}
                         >
                             {row.item_id}

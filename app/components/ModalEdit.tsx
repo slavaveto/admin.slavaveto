@@ -25,6 +25,16 @@ export default function ModalEdit({ isOpen, onClose, onSave, onCreate, isSaving,
     const [viewMode, setViewMode] = useState<'both' | 'ru-only' | 'uk-only'>('both');
     const [isSyncing, setIsSyncing] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
+    const [isDismissable, setIsDismissable] = useState(true);
+
+    // Обновляем dismissable, если были изменения
+    useEffect(() => {
+        if (isDirty || isSyncing) {
+            setIsDismissable(false); // Делаем модальное окно недоступным для закрытия
+        } else {
+            setIsDismissable(true); // Разрешаем закрытие
+        }
+    }, [isDirty, isSyncing]);
 
     const checkIfDirty = (newRu: string, newUk: string, newItemId: string) => {
         const isChanged =
@@ -81,6 +91,8 @@ export default function ModalEdit({ isOpen, onClose, onSave, onCreate, isSaving,
             const data = await response.json();
             setUk(data.reply || 'Нет ответа.');
             toast.success('Перевод успешно получен!');
+            // Устанавливаем `isDirty` в `true`, так как данные изменились
+            setIsDirty(true);
         } catch (error) {
             console.error('Ошибка при синхронизации:', error);
             toast.error('Ошибка при синхронизации. Попробуйте снова.');
@@ -109,7 +121,8 @@ export default function ModalEdit({ isOpen, onClose, onSave, onCreate, isSaving,
                         : '4xl'
                     : 'xl'
             }
-            isDismissable={false}
+            // isDismissable={false}
+            isDismissable={isDismissable}
             isKeyboardDismissDisabled={true}
             onOpenChange={(isOpen) => !isOpen && onClose()}
         >
