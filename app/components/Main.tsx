@@ -357,6 +357,9 @@ export default function Main() {
                             pages={pages}
                             selectedPage={selectedPage}
                             onSelectPage={handlePageSelection}
+                            onRename={(pageKey) => console.log(`Rename page: ${pageKey}`)}
+                            onCopy={(pageKey) => console.log(`Copy page: ${pageKey}`)}
+
                         />
                     )}
                 </div>
