@@ -157,6 +157,7 @@ export default function Main() {
             if (delay > 0) {
                 await new Promise((resolve) => setTimeout(resolve, delay));
             }
+
         } catch (err) {
             console.error('Unexpected error:', err);
             toast.error('Неожиданная ошибка при сохранении.');
