@@ -36,6 +36,19 @@ strong {
 
 
 
+
+figure.image {
+    padding-top: 0!important;
+    margin-top: 0!important; /* Если нужен также контроль отступов */
+    border-radius: 4px!important;
+}
+
+.ck-widget.image img {
+    border-radius: 4px!important; /* Ставим радиус скругления */
+    /*overflow: hidden; !* Чтобы изображение не выходило за рамки *!*/
+}
+
+
 .editor-wrapper {
     opacity: 0;
     transition: opacity 0.3s ease
@@ -52,6 +65,7 @@ strong {
     /*height: 110px!important;*/
     height: 100%!important;
 }
+
 .dark .ck.ck-content.ck-editor__editable {
     border: 2px solid #3f3f46 !important; /* Цвет границы */
 }
@@ -74,6 +88,9 @@ strong {
     padding-bottom: 6px!important;
 }
 .ck-powered-by {
+    display: none !important;
+}
+.ck-evaluation-badge {
     display: none !important;
 }
 

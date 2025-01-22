@@ -4,8 +4,6 @@ import { redirect } from "next/navigation";
 import { hasEnvVars } from "@/app/assets/auth/utils/supabase/check-env-vars";
 
 
-import Main from "@/app/components/Main";
-
 export default async function Home() {
     if (hasEnvVars) {
         const supabase = await createClient();
@@ -18,12 +16,13 @@ export default async function Home() {
         }
 
         return (
-            <main className="flex flex-grow container mx-auto px-3 xl:max-w-screen-xl">
+            <main className="flex flex-grow container mx-auto px-3 max-w-screen-lg">
+                <div className="flex w-full flex-col">
+                    <h1 className="text-xl font-bold my-4 pl-2">Edit Pages Info</h1>
 
-                    <Main />
 
 
-
+                </div>
             </main>
         );
     } else {

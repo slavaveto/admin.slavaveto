@@ -19,7 +19,7 @@ export const metadata = {
   title: "AdminPanel",
   description: "The fastest way to build apps with Next.js and Supabase",
   icons: {
-    icon: "/favicon.ico"
+    icon: process.env.NODE_ENV === "development" ? "/favicon_local.png" : "/favicon.png",
   },
 };
 

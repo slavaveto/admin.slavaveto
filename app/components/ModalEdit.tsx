@@ -109,6 +109,26 @@ export default function ModalEdit({ isOpen, onClose, onSave, onCreate, isSaving,
         }
     };
 
+    useEffect(() => {
+        if (isOpen) {
+            // Disable enforced focus behavior
+            const handleFocusOutside = (e: any) => {
+                if (!document.querySelector(".nextui-modal")?.contains(e.target)) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                }
+            };
+
+            // Add event listener to manage focus when modal is open
+            document.addEventListener("focus", handleFocusOutside, true);
+
+            // Cleanup event listener on modal close
+            return () => {
+                document.removeEventListener("focus", handleFocusOutside, true);
+            };
+        }
+    }, [isOpen]);
+
 
     return (
         <Modal
@@ -121,8 +141,9 @@ export default function ModalEdit({ isOpen, onClose, onSave, onCreate, isSaving,
                         : '4xl'
                     : 'xl'
             }
-            // isDismissable={false}
-            isDismissable={isDismissable}
+            isDismissable={false}
+            className="nextui-modal"
+            // isDismissable={isDismissable}
             isKeyboardDismissDisabled={true}
             onOpenChange={(isOpen) => !isOpen && onClose()}
         >

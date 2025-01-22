@@ -9,6 +9,9 @@ import { Link } from '@nextui-org/link';
 import { Edit, Trash, ArrowUp, ArrowDown, Copy } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
+import { useRouter } from 'next/navigation';
+
+
 import { handleSaveOrder, moveRowUp, moveRowDown } from './utils/changeOrder';
 import  copyItem  from './utils/сopyItem';
 
@@ -21,6 +24,9 @@ interface EditableTableProps {
 }
 
 export default function MainTable({ tableName, content, onEdit, onDelete, onToggleRich }: EditableTableProps) {
+
+    const router = useRouter(); // Используем хук useRouter
+
     const [tableContent, setTableContent] = useState(
         content.sort((a, b) => a.order - b.order) // Сортируем по полю `order` при инициализации
     );
@@ -51,6 +57,20 @@ export default function MainTable({ tableName, content, onEdit, onDelete, onTogg
         setTableContent,
         handleSaveOrder,
     });
+
+    const handleEdit = (row: { ru: string; uk: string; item_id: string; is_rich: boolean }) => {
+        if (row.is_rich) {
+            // Переход на страницу редактирования для Rich Text
+            router.push(`/editor/${row.item_id}`);
+            // router.push(`/editor`);
+        } else {
+            const rowWithOrder = {
+                ...row,
+                order: 0, // Укажите значение по умолчанию для order
+            };
+            onEdit(rowWithOrder); // Передайте объект с полем order
+        }
+    };
 
 
     return (
@@ -121,6 +141,7 @@ export default function MainTable({ tableName, content, onEdit, onDelete, onTogg
                             <div className="flex justify-between items-center    p-0 px-2 m-0">
                                 <Link
                                     className="mt-[-0px] cursor-pointer mr-[10px]"
+                                    // onClick={() => handleEdit(row)}
                                     onClick={() => onEdit(row)}
                                 >
                                     <Edit size={20} />
