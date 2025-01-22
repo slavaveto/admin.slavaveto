@@ -1,7 +1,37 @@
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import { Storage } from "@google-cloud/storage";
 import sharp from "sharp";
+import { v4 as uuidv4 } from "uuid";
+import fs from "fs";
+
+
+// Проверяем, что переменные окружения заданы
+if (!process.env.GOOGLE_CLOUD_KEY) {
+    console.error("Ошибка: Переменные окружения GOOGLE_CLOUD_KEY или GOOGLE_CLOUD_BUCKET_NAME не заданы.");
+    throw new Error("Не заданы переменные окружения.");
+}
+
+// Парсим JSON-ключ из переменной окружения
+let credentials;
+try {
+    credentials = JSON.parse(process.env.GOOGLE_CLOUD_KEY);
+    console.log("JSON-ключ успешно разобран из переменной окружения.");
+} catch (error) {
+    console.error("Ошибка при разборе JSON-ключа из переменной окружения:", error);
+    throw error;
+}
+
+// Инициализация Google Cloud Storage
+const storage = new Storage({ credentials });
+console.log("Инициализация Google Cloud Storage успешна.");
+
+if (!process.env.GOOGLE_CLOUD_BUCKET_NAME) {
+    console.error("Ошибка: Переменные окружения не заданы.");
+    throw new Error("Не заданы переменные окружения GOOGLE_CLOUD_BUCKET_NAME или GOOGLE_CLOUD_KEY_FILE.");
+}
+
+const bucketName = process.env.GOOGLE_CLOUD_BUCKET_NAME;
+const projectFolder = "uploads"; // Папка для хранения файлов
 
 export const config = {
     api: {
@@ -9,20 +39,13 @@ export const config = {
     },
 };
 
-// Функция для генерации случайного имени файла
-function generateRandomName() {
-    const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let result = "";
-    for (let i = 0; i < 8; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-}
-
-export async function POST(req:any) {
+export async function POST(req: any) {
     try {
+        console.log("Запрос на загрузку файла получен.");
+
         const contentType = req.headers.get("content-type");
         if (!contentType || !contentType.startsWith("multipart/form-data")) {
+            console.error("Неправильный Content-Type:", contentType);
             return NextResponse.json(
                 { error: "Неправильный Content-Type" },
                 { status: 400 }
@@ -31,30 +54,23 @@ export async function POST(req:any) {
 
         const boundary = contentType.split("boundary=")[1];
         if (!boundary) {
+            console.error("Boundary не найден.");
             return NextResponse.json(
                 { error: "Boundary не найден в заголовке Content-Type" },
                 { status: 400 }
             );
         }
 
-        const uploadDir = path.join(process.cwd(), "public/uploads");
-        const resizedDir = path.join(uploadDir, "resized");
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-        if (!fs.existsSync(resizedDir)) {
-            fs.mkdirSync(resizedDir, { recursive: true });
-        }
-
         const reader = req.body?.getReader();
         if (!reader) {
+            console.error("Ошибка: Тело запроса пустое.");
             return NextResponse.json({ error: "Тело запроса пустое" }, { status: 400 });
         }
 
-        const chunks = [];
+        const chunks: Uint8Array[] = [];
         let done = false;
 
-        // Читаем данные как бинарный поток
+        console.log("Чтение данных из тела запроса...");
         while (!done) {
             const { value, done: streamDone } = await reader.read();
             if (value) chunks.push(value);
@@ -64,10 +80,16 @@ export async function POST(req:any) {
         const buffer = Buffer.concat(chunks);
 
         // Парсим multipart/form-data
+        console.log("Парсинг multipart/form-data...");
         const parts = buffer
             .toString("binary")
             .split(`--${boundary}`)
             .filter((part) => part.trim() !== "--" && part.trim() !== "");
+
+        if (!parts.length) {
+            console.error("Ошибка: Данные файла не найдены.");
+            return NextResponse.json({ error: "Файл не найден" }, { status: 400 });
+        }
 
         for (const part of parts) {
             const headersEndIndex = part.indexOf("\r\n\r\n");
@@ -80,49 +102,70 @@ export async function POST(req:any) {
                 const originalFilename = filenameMatch ? filenameMatch[1] : null;
 
                 if (originalFilename) {
-                    const fileExtension = path.extname(originalFilename); // Получаем расширение
-                    const randomName = generateRandomName(); // Генерируем случайное имя
+                    console.log("Обработка файла:", originalFilename);
 
-                    // Оригинальный файл
-                    const filePath = path.join(uploadDir, `${randomName}${fileExtension}`);
-                    fs.writeFileSync(filePath, Buffer.from(body, "binary"));
+                    const fileExtension = originalFilename.split(".").pop();
+                    const randomName = uuidv4(); // Генерируем уникальное имя
 
-                    // Получаем размер оригинального изображения
-                    const metadata = await sharp(filePath).metadata();
+                    const cloudPath = `${projectFolder}/${randomName}.${fileExtension}`;
+                    const file = storage.bucket(bucketName).file(cloudPath);
+
+                    console.log("Сохранение оригинального файла в Google Cloud:", cloudPath);
+                    await file.save(Buffer.from(body, "binary"), {
+                        metadata: {
+                            contentType: headersRaw.match(/Content-Type: (.+?)\r\n/i)?.[1] || "application/octet-stream",
+                        },
+                    });
+
+                    const tempPath = `/tmp/${randomName}.${fileExtension}`;
+                    fs.writeFileSync(tempPath, Buffer.from(body, "binary"));
+
+                    const metadata = await sharp(tempPath).metadata();
                     const originalWidth = metadata.width || Infinity;
 
-                    // Создаем уменьшенные копии только если размер меньше оригинального
+                    console.log("Создание уменьшенных копий...");
                     const sizes = [320, 768, 1024, 1920];
-                    const resizedFiles = [];
+                    const resizedUrls = [];
 
                     for (const size of sizes) {
                         if (size <= originalWidth) {
-                            const resizedFilePath = path.join(
-                                resizedDir,
-                                `${randomName}_${size}${fileExtension}`
-                            );
-                            await sharp(filePath)
+                            const resizedFileName = `${randomName}_${size}.${fileExtension}`;
+                            const resizedFilePath = `/tmp/${resizedFileName}`;
+                            const resizedCloudPath = `${projectFolder}/resized/${resizedFileName}`;
+
+                            console.log(`Создание уменьшенного файла: ${resizedFileName}`);
+                            await sharp(tempPath)
                                 .resize(size, null, {
                                     fit: "inside",
                                     withoutEnlargement: true,
                                 })
                                 .toFile(resizedFilePath);
 
-                            resizedFiles.push(`/uploads/resized/${randomName}_${size}${fileExtension}`);
+                            console.log(`Загрузка уменьшенного файла в Google Cloud: ${resizedCloudPath}`);
+                            const resizedFile = storage.bucket(bucketName).file(resizedCloudPath);
+                            await resizedFile.save(fs.readFileSync(resizedFilePath), {
+                                metadata: {
+                                    contentType: metadata.format ? `image/${metadata.format}` : "image/jpeg",
+                                },
+                            });
+
+                            resizedUrls.push(`https://storage.googleapis.com/${bucketName}/${resizedCloudPath}`);
                         }
                     }
-                    //const baseUrl = 'https://.com';
+
+                    console.log("Файл успешно обработан.");
                     return NextResponse.json({
-                        url: `/uploads/${randomName}${fileExtension}`,
-                        resized: resizedFiles,
+                        url: `https://storage.googleapis.com/${bucketName}/${cloudPath}`,
+                        resized: resizedUrls,
                     });
                 }
             }
         }
 
+        console.error("Файл не найден в form-data.");
         return NextResponse.json({ error: "Файл не найден в form-data" }, { status: 400 });
     } catch (error) {
-        console.error("Ошибка при загрузке файла:", error);
+        console.error("Ошибка при обработке запроса:", error);
         return NextResponse.json({ error: "Ошибка загрузки файла" }, { status: 500 });
     }
 }

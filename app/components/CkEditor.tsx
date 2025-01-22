@@ -198,15 +198,6 @@ const CustomEditor = ({ data, onChange }: CustomEditorProps) => {
 
 
 
-                    document.addEventListener('click', (event) => {
-                        console.log('Clicked element:', event.target);
-                    });
-
-
-
-
-
-
                     editor.model.schema.extend('imageBlock', {
                         allowAttributes: ['width'],
                     });
