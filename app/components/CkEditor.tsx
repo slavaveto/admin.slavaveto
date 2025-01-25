@@ -75,7 +75,7 @@ const CustomEditor = ({ data, onChange }: CustomEditorProps) => {
                     placeholder: 'Type or paste your content here!',
 
                     toolbar: {
-                        items: ['bold', 'italic', 'underline', '|', 'fontSize', 'fontColor', 'fontBackgroundColor', '|', 'insertImage', 'link', '|', 'alignment', 'bulletedList'],
+                        items: ['heading', '|','bold', 'italic', 'underline', '|', 'fontSize', 'fontColor', 'fontBackgroundColor', '|', 'insertImage', 'link', '|', 'alignment', 'bulletedList'],
                         shouldNotGroupWhenFull: false
                     },
 
@@ -141,12 +141,32 @@ const CustomEditor = ({ data, onChange }: CustomEditorProps) => {
                                 value: '75',
                             },
                             {
+                                name: 'resizeImage:100',
+                                label: '100%',
+                                value: '100',
+                            },
+                            {
                                 name: 'resizeImage:original',
                                 label: 'Original',
                                 value: null,
                             },
                         ],
                         resizeUnit: '%',
+                    },
+                    heading: {
+                        options: [
+                            {
+                                model: 'paragraph',
+                                title: 'Paragraph',
+                                class: 'ck-heading_paragraph'
+                            },
+                            {
+                                model: 'heading',
+                                view: 'h1',
+                                title: 'Heading',
+                                class: 'heading'
+                            },
+                        ]
                     },
                     fontSize: {
                         options: [12, 13, 14, 15, 'default', 17, 18, 19, 20],
@@ -164,6 +184,31 @@ const CustomEditor = ({ data, onChange }: CustomEditorProps) => {
                             'Trebuchet MS, Helvetica, sans-serif',
                             'Verdana, Geneva, sans-serif',
                         ],
+                    },
+                    fontColor: {
+                        colors: [
+                            {
+                                color: '#006FEE',
+                                label: 'Primary'
+                            },
+                            {
+                                color: '#7828c8',
+                                label: 'Secondary'
+                            },
+                            {
+                                color: '#17c964',
+                                label: 'Success'
+                            },
+                            {
+                                color: '#f5a524',
+                                label: 'Warning'
+                            },
+                            {
+                                color: '#f31260',
+                                label: 'Danger'
+                                // hasBorder: true // Если фон совпадает с цветом текста, добавляем границу
+                            },
+                        ]
                     },
                     list: {
                         properties: {
@@ -209,6 +254,9 @@ const CustomEditor = ({ data, onChange }: CustomEditorProps) => {
 
                             if (viewFigure && viewFigure.is('element', 'figure')) {
                                 viewWriter.setStyle('width', '25%', viewFigure);
+
+                                // viewWriter.setStyle('float', 'left', viewFigure);
+
                                 viewWriter.addClass('image_resized', viewFigure);
                                 viewWriter.addClass('image-style-align-left', viewFigure);
 

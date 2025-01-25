@@ -19,6 +19,13 @@ const config = {
       },
     },
     extend: {
+
+      screens: {
+        xs375: '375px', // Extra Small
+        xs390: '390px',
+        xs414: '414px',
+      },
+
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

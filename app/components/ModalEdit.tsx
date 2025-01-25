@@ -107,6 +107,7 @@ export default function ModalEdit({ isOpen, onClose, onSave, onCreate, isSaving,
         } else {
             onSave(itemId, ru, uk);
         }
+        // setIsDirty(false); // После сохранения сбрасываем флаг isDirty
     };
 
     useEffect(() => {
@@ -151,6 +152,7 @@ export default function ModalEdit({ isOpen, onClose, onSave, onCreate, isSaving,
                 <>
                     <ModalHeader className="flex flex-row items-center justify-between pr-14">
                         {mode === 'create' ? 'Create New Translation' : `Edit Translation`}
+
                         {initialValues.is_rich && (
                             <RadioGroup
                                 orientation="horizontal"
@@ -163,6 +165,7 @@ export default function ModalEdit({ isOpen, onClose, onSave, onCreate, isSaving,
                                 <Radio value="uk-only" />
                             </RadioGroup>
                         )}
+
                     </ModalHeader>
                     <ModalBody className="pb-4">
                         {viewMode === 'both' && (

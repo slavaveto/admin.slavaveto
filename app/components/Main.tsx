@@ -163,7 +163,8 @@ export default function Main() {
             toast.error('Неожиданная ошибка при сохранении.');
         } finally {
             setIsSaving(false); // Сбрасываем состояние загрузки
-            setIsModalOpen(false); // Закрываем модальное окно
+
+            // setIsModalOpen(false); // Закрываем модальное окно
 
             setTimeout(() => {
                 toast.success('Данные успешно обновлены');
