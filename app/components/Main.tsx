@@ -326,7 +326,7 @@ export default function Main() {
         <div className="flex w-full flex-col">
 
             <div className="w-full flex justify-between items-center">
-            <h1 className="text-xl font-bold my-4 pl-2">Pages Translations</h1>
+            <p className="text-xl font-medium my-4 pl-2">Pages Translations</p>
 
 
                 {/*<CustomEditor />*/}

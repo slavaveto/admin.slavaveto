@@ -133,7 +133,7 @@ export default function MainTable({ tableName, content, onEdit, onDelete, onTogg
                         </TableCell>
                         <TableCell className="-w-1/12 border-l border-default-300 justify-center text-center  p-0 m-0">
                             <div className="flex justify-center items-center p-0 m-0 ml-[8px]">
-                            <Checkbox isSelected={row.is_rich} onChange={() => onToggleRich(row)} />
+                                <Checkbox isSelected={row.is_rich} onChange={() => onToggleRich(row)} />
                             </div>
                         </TableCell>
                         <TableCell className="-w-1/12 border-l border-default-300 text-center p-0 m-0">

@@ -63,7 +63,7 @@ export default function ModalEdit({ isOpen, onClose, onSave, onCreate, isSaving,
             setRu(initialValues.ru || '');
             setUk(initialValues.uk || '');
             setItemId(initialValues.item_id || '');
-            setViewMode('both');
+            setViewMode('ru-only');
         }
     }, [isOpen]);
 
@@ -138,9 +138,9 @@ export default function ModalEdit({ isOpen, onClose, onSave, onCreate, isSaving,
             size={
                 initialValues.is_rich
                     ? viewMode === 'both'
-                        ? '3xl'
+                        ? '4xl'
                         : '4xl'
-                    : 'xl'
+                    : '4xl'
             }
             isDismissable={false}
             className="nextui-modal"
@@ -158,17 +158,23 @@ export default function ModalEdit({ isOpen, onClose, onSave, onCreate, isSaving,
                                 orientation="horizontal"
                                 value={viewMode}
                                 onChange={(e) => setViewMode(e.target.value as 'both' | 'ru-only' | 'uk-only')}
-                                className="space-x-4"
+                                className="space-x-4 font-normal"
                             >
-                                <Radio value="both" />
-                                <Radio value="ru-only" />
-                                <Radio value="uk-only" />
+                                <div className="flex items-center ">
+                                    <span className={"mr-[8px]"}>RU</span>
+                                    <Radio value="ru-only"/>
+                                </div>
+
+                                <Radio value="both"/>
+
+                                <Radio value="uk-only"/>
+                                <span className={"ml-[-10px]"}>UA</span>
                             </RadioGroup>
                         )}
 
                     </ModalHeader>
                     <ModalBody className="pb-4">
-                        {viewMode === 'both' && (
+                        {(viewMode === 'both' && initialValues.is_rich) || !initialValues.is_rich ? (
                             <div className="mb-4">
                                 <Input
                                     // labelPlacement="outside"
@@ -190,11 +196,11 @@ export default function ModalEdit({ isOpen, onClose, onSave, onCreate, isSaving,
                                     }}
                                 />
                             </div>
-                        )}
+                        ) : null}
 
                         {viewMode !== 'uk-only' && initialValues.is_rich && (
-                            <div className={`mb-5 ${viewMode === 'ru-only' ? 'h-[450px]' : 'h-[132px]'}`}>
-                                <p className="text-primary ml-[8px]">Ru</p>
+                            <div className={`mb-5 ${viewMode === 'ru-only' ? 'h-[500px]' : 'h-[200px]'}`}>
+                                <p className="text-primary ml-[8px] font-medium">Ru</p>
                                 <CustomEditor data={ru}
                                               onChange={(newData: string) => {
                                                   setRu(newData); // Обновляем состояние ru
@@ -204,8 +210,8 @@ export default function ModalEdit({ isOpen, onClose, onSave, onCreate, isSaving,
                         )}
 
                         {viewMode !== 'ru-only' && initialValues.is_rich && (
-                            <div className={`mb-5 ${viewMode === 'uk-only' ? 'h-[450px]' : 'h-[132px]'}`}>
-                                <p className="text-primary ml-[8px]">Uk</p>
+                            <div className={`mb-5 ${viewMode === 'uk-only' ? 'h-[500px]' : 'h-[200px]'}`}>
+                                <p className="text-primary ml-[8px] font-medium">Uk</p>
                                 <CustomEditor data={uk}
                                               onChange={(newData: string) => {
                                                   setUk(newData); // Обновляем состояние uk
@@ -247,7 +253,7 @@ export default function ModalEdit({ isOpen, onClose, onSave, onCreate, isSaving,
                         )}
                     </ModalBody>
                     <ModalFooter className="m-0 pt-0 flex items-center justify-end">
-                        {viewMode === 'both' && (
+                        {/*{viewMode === 'both' && (*/}
                             <Link
                                 className={`mr-10 cursor-pointer text-default-500 hover:text-primary ${
                                     isSyncing ? 'animate-spin text-primary' : ''
@@ -257,7 +263,7 @@ export default function ModalEdit({ isOpen, onClose, onSave, onCreate, isSaving,
                             >
                                 <RefreshCw size={24} />
                             </Link>
-                        )}
+                        {/*)}*/}
                         <Button color="danger" variant="light" onPress={onClose} isDisabled={isSaving || isSyncing}>
                             Cancel
                         </Button>

@@ -30,6 +30,7 @@ export function pageList() {
                 ...(data || [])
                     .map((page) => ({ ...page, order: page.order ?? Infinity }))
                     .sort((a, b) => a.order! - b.order!),
+                { page_key: 'projs', order: Infinity }, // Добавляем `projs` перед `misc`
                 { page_key: 'misc', order: Infinity + 1 },
             ];
 

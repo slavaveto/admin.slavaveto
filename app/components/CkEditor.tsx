@@ -1,6 +1,7 @@
 'use client'; // only in App Router
 
 import { CKEditor } from '@ckeditor/ckeditor5-react';
+
 import {
     ClassicEditor,
     InlineEditor,
@@ -44,15 +45,12 @@ import 'ckeditor5-premium-features/ckeditor5-premium-features.css';
 import React, { useState } from 'react';
 
 const LICENSE_KEY =
-    'eyJhbGciOiJFUzI1NiJ9.eyJleHAiOjE3Mzc4NDk1OTksImp0aSI6IjM2ZTg0ODAzLWRmYzUtNGJkYy04MzFjLTI2Y2IzOTY4ZjQyYiIsInVzYWdlRW5kcG9pbnQiOiJodHRwczovL3Byb3h5LWV2ZW50LmNrZWRpdG9yLmNvbSIsImRpc3RyaWJ1dGlvbkNoYW5uZWwiOlsiY2xvdWQiLCJkcnVwYWwiLCJzaCJdLCJ3aGl0ZUxhYmVsIjp0cnVlLCJsaWNlbnNlVHlwZSI6InRyaWFsIiwiZmVhdHVyZXMiOlsiKiJdLCJ2YyI6ImUwNGJjZTRkIn0.0YnbXyXGoJigqYpCppDQSwJjhK2EgzbUVgpinviafWfICE4rXYpBgzx-OzViEgDeGRc-X8ergYAPjaFpuPyQnQ';
+    'eyJhbGciOiJFUzI1NiJ9.eyJleHAiOjE3NjgxNzU5OTksImp0aSI6IjNmNWIzOTU1LTQxZjYtNDFhMC05YjQwLTVlZGI5NjVhZTdkYiIsInVzYWdlRW5kcG9pbnQiOiJodHRwczovL3Byb3h5LWV2ZW50LmNrZWRpdG9yLmNvbSIsImRpc3RyaWJ1dGlvbkNoYW5uZWwiOlsiY2xvdWQiLCJkcnVwYWwiXSwiZmVhdHVyZXMiOlsiRFJVUCJdLCJ2YyI6IjgyNmEwY2M3In0.SoCMRJnGBRI5UX-Ni-nY5UZ_WDg7blY0t8O_NwJgbrKaQDv4XTfzwD5lg2ON5Q8zD9Wbr0asaPsqh4olPj8Ouw';
 
 interface CustomEditorProps {
     data: string; // Данные для редактора
     onChange: (data: string) => void; // Функция обратного вызова для изменений
 }
-
-
-
 
 
 const CustomEditor = ({ data, onChange }: CustomEditorProps) => {
@@ -70,8 +68,10 @@ const CustomEditor = ({ data, onChange }: CustomEditorProps) => {
                 config={{
 
 
-                    licenseKey: LICENSE_KEY,
-                    // initialData: 'Welcome to CKEditor 5!',
+                    // licenseKey: LICENSE_KEY,
+                    licenseKey: "GPL",
+
+
                     placeholder: 'Type or paste your content here!',
 
                     toolbar: {
